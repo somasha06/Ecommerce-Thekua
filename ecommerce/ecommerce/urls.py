@@ -15,8 +15,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
+from rest_framework import routers
+from rest_framework.routers import DefaultRouter
+from django.conf import settings
+from django.conf.urls.static import static
+from thekua.views import *
+
+router = routers.DefaultRouter()
+# router.register(r'users', UserViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-]
+    path('api-auth/', include('rest_framework.urls')),
+    path("signup/", SignupRequestAPIView.as_view()),
+    path("verify-otp/", OTPVerifyAPIView.as_view()),
+    path("login/", LoginAPIView.as_view(), name="login"),
+    path("profile/", ProfileAPIView.as_view(), name="profile"),
+
+
+]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)

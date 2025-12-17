@@ -23,15 +23,17 @@ from django.conf.urls.static import static
 from thekua.views import *
 
 router = routers.DefaultRouter()
-# router.register(r'users', UserViewSet)
+router.register(r"address", AddressViewSet, basename="address")
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path("", include("thekua.urls")),
     path('api-auth/', include('rest_framework.urls')),
+    path("api/", include(router.urls)),
     path("signup/", SignupRequestAPIView.as_view()),
     path("verify-otp/", OTPVerifyAPIView.as_view()),
     path("login/", LoginAPIView.as_view(), name="login"),
-    path("profile/", ProfileAPIView.as_view(), name="profile"),
 
 
 ]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)

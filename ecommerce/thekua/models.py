@@ -5,6 +5,9 @@ from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.text import slugify
+from .utils import generate_unique_slug
+
 
 # Create your models here.
 
@@ -77,6 +80,14 @@ class Address(models.Model):
 
 class Category(models.Model):
     name=models.CharField(max_length=200)
+    is_active = models.BooleanField(default=True)
+    slug = models.SlugField(unique=True,blank=True)
+    image = models.ImageField(upload_to="categories/", null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -84,22 +95,42 @@ class Category(models.Model):
 class SubCategory(models.Model):
     category=models.ForeignKey(Category,related_name="subcategory",on_delete=models.CASCADE)
     name=models.CharField(max_length=200)
+    slug = models.SlugField(unique=True,blank=True)
+    image=models.ImageField(upload_to="subcategories/", null=True, blank=True)
+
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
 class Product(models.Model):
     # category=models.ForeignKey(Category,on_delete=models.CASCADE)
-    sub_category=models.ForeignKey(SubCategory,on_delete=models.CASCADE)
+    subcategory=models.ForeignKey(SubCategory,on_delete=models.CASCADE)
     name=models.CharField(max_length=200)
     description=models.CharField(max_length=500)
     seller=models.ForeignKey(User,on_delete=models.CASCADE)
     created_at=models.DateField(auto_now_add=True)
+    price=models.CharField(max_length=200,null=True,blank=True)
     updated_at=models.DateField(auto_now=True)
     is_active=models.BooleanField(default=False)
+    slug = models.SlugField(unique=True,blank=True)
+    image=models.ImageField(upload_to="products/", null=True, blank=True)
+
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 class ProductVariant(models.Model):
-    product=models.ForeignKey(Product,on_delete=models.CASCADE)
+    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="productvariants")
     weight=models.CharField(max_length=200)
     price=models.DecimalField(max_digits=10,decimal_places=2)
     discount_price=models.DecimalField(max_digits=10,decimal_places=2,null=True,blank=True)
@@ -109,6 +140,26 @@ class ProductVariant(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.weight}"
+
+class Wishlist(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="wishlist")
+    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="wishlistby")
+    created_at=models.DateField(auto_now_add=True)
+
+    class Meta:
+        unique_together=["user","product"]
+
+    def __str__(self):
+        return f"{self.user.username}  {self.product.name}"
+
+class WishlistItem(models.Model):
+    pass
+
+class Order(models.Model):
+    pass
+
+class OrderItem(models.Model):
+    pass
     
 class Reviews(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="reviews")

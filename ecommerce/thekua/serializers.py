@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import PendingUser,Role,User,Address,Category,SubCategory,Product,ProductVariant,Reviews
+from .models import *
 from .utils import generate_otp,send_otp
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
@@ -12,6 +12,7 @@ class SignupRequestSerializer(serializers.Serializer):
     email=serializers.EmailField(required=False)
     mobile_no=serializers.CharField(required=False)
     profile_pic=serializers.ImageField(required=False)
+
     def validate(self,data):
         if not data.get("email") and not data.get("mobile_no"):
             raise serializers.ValidationError("Email or mobile number is required")
@@ -23,7 +24,7 @@ class SignupRequestSerializer(serializers.Serializer):
         pending_user=PendingUser.objects.create(
             email=validated_data.get("email"),
             mobile_no=validated_data.get("mobile_no"),
-            otp=otp
+            otp=otp #sesseion id and created at is filled automatically by  Django 
         )
 
         send_otp(validated_data.get("email") or validated_data.get("mobile_no"),otp)
@@ -53,7 +54,7 @@ class OTPVerifySerializer(serializers.Serializer):
         pending=validated_data["pending_user"]
 
         user=User.objects.create(
-            username=validated_data["username"],
+            username=validated_data["username"], #validated_data contains clean, validated input from the request
             email=pending.email,
             mobile_no=pending.mobile_no,
         )
@@ -105,30 +106,42 @@ class AddressSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model=Category
-        fields=["id","name"]
+        fields=["id","name","slug","is_active"]
+        read_only_fields = ["slug"]
 
 class SubCategorySeializer(serializers.ModelSerializer):
     category_name=serializers.ReadOnlyField(source="category.name")
 
     class Meta:
         model=SubCategory
-        fields=["id", "name", "category", "category_name"]
-
-class ProductSerializer(serializers.ModelSerializer):
-    subcategory_name=serializers.ReadOnlyField(source="subcategory.name")
-    seller_username=serializers.ReadOnlyField(source="seller.username")
-
-    class Meta:
-        model=Product
-        fields=["id","name","description","subcategory_name","seller_username"]
-
+        fields=["category", "category_name","id", "name","slug","image"]
+        read_only_fields = ["slug"]
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     product_name=serializers.ReadOnlyField(source="product.name")
 
     class Meta:
         model=ProductVariant
-        fields=["id","product","product_name","weight","price","discount_price","stock"]
+        fields=["id","product","product_name","weight","price","discount_price","stock","sku","is_active"]
+
+class ProductSerializer(serializers.ModelSerializer):
+    subcategory_name=serializers.ReadOnlyField(source="subcategory.name")
+    # seller_username=serializers.ReadOnlyField(source="seller.username")
+    # variants = ProductVariantSerializer(many=True, read_only=True)
+
+    class Meta:
+        model=Product
+        fields=["id","name","subcategory","subcategory_name","price","is_active","slug","image"]
+        read_only_fields = ["slug"]
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    subcategory_name=serializers.ReadOnlyField(source="subcategory.name")
+    seller_username=serializers.ReadOnlyField(source="seller.username")
+    variants = ProductVariantSerializer(many=True, read_only=True,source="productvariants")
+    
+    class Meta:
+        model=Product
+        fields=["id","subcategory","subcategory_name","seller_username","name","description","created_at","updated_at","is_active","slug","variants"]
 
 class Review(serializers.ModelSerializer):
     review_user=serializers.ReadOnlyField(source="user.username")
@@ -140,3 +153,11 @@ class Review(serializers.ModelSerializer):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5")
         return value
+    
+class WishlistSerializer(serializers.ModelSerializer):
+    product_name=serializers.ReadOnlyField(source="product.name")
+    product_slug=serializers.ReadOnlyField(source="product.slug")
+
+    class Meta:
+        model=Wishlist
+        fields=["id","product","product_name","product_slug","created_at"]

@@ -24,7 +24,11 @@ from thekua.views import *
 
 router = routers.DefaultRouter()
 router.register(r"address", AddressViewSet, basename="address")
-
+router.register(r"categories",CategoryViewSet,basename="category")
+router.register(r"subcategories",SubcategoryViewSet,basename="subcategory")
+router.register(r"products",ProductViewSet,basename="product")
+router.register(r"productsvariants",ProductVariantViewSet,basename="productvariant")
+router.register(r"wishlist",WishlistViewSet,basename="wishlist")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

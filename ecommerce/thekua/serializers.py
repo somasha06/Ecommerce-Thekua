@@ -154,10 +154,20 @@ class Review(serializers.ModelSerializer):
             raise serializers.ValidationError("Rating must be between 1 and 5")
         return value
     
-class WishlistSerializer(serializers.ModelSerializer):
+class WishlistitemSerializer(serializers.ModelSerializer):
     product_name=serializers.ReadOnlyField(source="product.name")
-    product_slug=serializers.ReadOnlyField(source="product.slug")
+    product_price=serializers.ReadOnlyField(source="product.productvariant_set.first.price")
+
+    class Meta:
+        model=WishlistItem
+        fields=["id","product","product_name","product_slug","product_price","added_at"]
+        read_only_fields=["id","added_at"]
+
+class WishlistSerializer(serializers.ModelSerializer):
+    items=WishlistitemSerializer(many=True,read_only=True)
 
     class Meta:
         model=Wishlist
-        fields=["id","product","product_name","product_slug","created_at"]
+        fields=["id","user","items","created_at"]
+
+        read_only_fields=["id","user","created_at"]

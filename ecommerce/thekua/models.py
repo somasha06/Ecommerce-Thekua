@@ -143,17 +143,23 @@ class ProductVariant(models.Model):
 
 class Wishlist(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="wishlist")
-    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="wishlistby")
-    created_at=models.DateField(auto_now_add=True)
-
-    class Meta:
-        unique_together=["user","product"]
+    # product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="wishlistby")
+    created_at=models.DateField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.user.username}  {self.product.name}"
+        return f"{self.user.username}'s wishlist"
 
 class WishlistItem(models.Model):
-    pass
+    wishlist=models.ForeignKey(Wishlist,on_delete=models.CASCADE,related_name="wishlistitem",null=True,blank=True)
+    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="wishlistby",null=True,blank=True)
+    added_at=models.DateField(default=timezone.now)
+
+    class Meta:
+        unique_together=["wishlist","product"]
+
+    def __str__(self):
+        return f"{self.product.name} in {self.wishlist.user.username}'s wishlist"
+
 
 class Order(models.Model):
     pass

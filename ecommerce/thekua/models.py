@@ -7,8 +7,9 @@ from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 from .utils import generate_unique_slug
+from django.conf import settings
 
-
+User = settings.AUTH_USER_MODEL
 # Create your models here.
 
 class User(AbstractUser):
@@ -142,23 +143,25 @@ class ProductVariant(models.Model):
         return f"{self.product.name} - {self.weight}"
 
 class Wishlist(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="wishlist")
+    user=models.OneToOneField(User,on_delete=models.CASCADE,related_name="wishlist")
     # product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="wishlistby")
-    created_at=models.DateField(default=timezone.now)
+    created_at=models.DateField(default=timezone.localdate)
 
     def __str__(self):
         return f"{self.user.username}'s wishlist"
 
 class WishlistItem(models.Model):
     wishlist=models.ForeignKey(Wishlist,on_delete=models.CASCADE,related_name="wishlistitem",null=True,blank=True)
-    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="wishlistby",null=True,blank=True)
-    added_at=models.DateField(default=timezone.now)
+    product_variant=models.ForeignKey(ProductVariant,on_delete=models.CASCADE,null=True,blank=True)
+    added_at=models.DateField(default=timezone.localdate)
 
     class Meta:
-        unique_together=["wishlist","product"]
+        unique_together=["wishlist","product_variant"]
+        pass
 
     def __str__(self):
-        return f"{self.product.name} in {self.wishlist.user.username}'s wishlist"
+        return f"{self.product_variant.product.name} in {self.wishlist.user.username}'s wishlist"
+
 
 
 class Order(models.Model):

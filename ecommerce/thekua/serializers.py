@@ -128,10 +128,11 @@ class ProductSerializer(serializers.ModelSerializer):
     subcategory_name=serializers.ReadOnlyField(source="subcategory.name")
     # seller_username=serializers.ReadOnlyField(source="seller.username")
     # variants = ProductVariantSerializer(many=True, read_only=True)
+    is_wishlisted = serializers.BooleanField(read_only=True)
 
     class Meta:
         model=Product
-        fields=["id","name","subcategory","subcategory_name","price","is_active","slug","image"]
+        fields=["id","name","subcategory","subcategory_name","price","is_active","slug","image","is_wishlisted"]
         read_only_fields = ["slug"]
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -155,19 +156,18 @@ class Review(serializers.ModelSerializer):
         return value
     
 class WishlistitemSerializer(serializers.ModelSerializer):
-    product_name=serializers.ReadOnlyField(source="product.name")
-    product_price=serializers.ReadOnlyField(source="product.productvariant_set.first.price")
+    
+    product_name=serializers.ReadOnlyField(source="product_variant.product.name")
+    product_weight=serializers.ReadOnlyField(source="product_variant.weight")
+    product_price = serializers.ReadOnlyField(source="product_variant.price")
+    product_slug=serializers.ReadOnlyField(source="product_variant.product.slug")
 
     class Meta:
         model=WishlistItem
-        fields=["id","product","product_name","product_slug","product_price","added_at"]
+        fields=["id","product_variant","product_name","product_slug","product_weight","product_price","added_at"]
         read_only_fields=["id","added_at"]
 
 class WishlistSerializer(serializers.ModelSerializer):
-    items=WishlistitemSerializer(many=True,read_only=True)
-
     class Meta:
-        model=Wishlist
-        fields=["id","user","items","created_at"]
-
-        read_only_fields=["id","user","created_at"]
+        model = Wishlist
+        fields = ["id", "created_at"]

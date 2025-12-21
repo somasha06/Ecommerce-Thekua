@@ -2,4 +2,8 @@ from django.apps import AppConfig
 
 
 class ThekuaConfig(AppConfig):
-    name = 'thekua'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "thekua"
+
+    def ready(self):
+        import thekua.signals

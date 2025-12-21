@@ -8,7 +8,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from .models import *
 from rest_framework.viewsets import ModelViewSet
+from django.db.models import Exists, OuterRef, BooleanField, Value
+from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.decorators import action
 from .permissions import *
+from django.shortcuts import get_object_or_404
+
+
 # Create your views here.
 
 class SignupRequestAPIView(APIView):
@@ -95,10 +101,27 @@ class ProductViewSet(ModelViewSet):
 
     def get_queryset(self):
         queryset = Product.objects.prefetch_related("productvariants")
+        
         subCategory_id=self.request.query_params.get("subcategory")
         if subCategory_id:
             queryset=queryset.filter(subCategory_id=subCategory_id)
-        return queryset
+        
+        user = self.request.user
+        if not user.is_authenticated:
+            return queryset.annotate(
+                is_wishlisted=Value(False, output_field=BooleanField())
+            )
+        
+        wishlist = user.wishlist
+
+        return queryset.annotate(
+            is_wishlisted=Exists(
+                WishlistItem.objects.filter(
+                    wishlist=wishlist,
+                    product_variant__product=OuterRef("pk")
+                )
+            )
+        )
     
 class ProductVariantViewSet(ModelViewSet):
     serializer_class=ProductVariantSerializer
@@ -111,12 +134,74 @@ class ProductVariantViewSet(ModelViewSet):
             queryset=queryset.filter(product_id=product_id)
         return queryset
 
-class WishlistViewSet(ModelViewSet):
+class WishlistViewSet(ReadOnlyModelViewSet):
     serializer_class=WishlistSerializer
-    permission_classes=[IsAdminorCustomer]
+    permission_classes=[IsCustomer]
 
     def get_queryset(self):
         return Wishlist.objects.filter(user=self.request.user)
     
+    # def perform_create(self, serializer):
+    #     wishlist = self.request.user.wishlist
+    #     serializer.save(user=self.request.user)
+
+    # def my_wishlist(self,request):
+    #     wishlist,_=Wishlist.objects.get_or_create(user=request.user)
+    #     serializer=self.get_serializer(wishlist)
+    #     return Response(serializer.data)
+    
+class WishlistItemViewSet(ModelViewSet):
+    serializer_class=WishlistitemSerializer
+    permission_classes=[IsCustomer]
+
+    def get_queryset(self):
+        return WishlistItem.objects.filter(wishlist__user=self.request.user).select_related("product_variant","product_variant__product")#To filter through relations → use __
+    
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # wishlist,_=Wishlist.objects.get_or_create(user=self.request.user)
+        serializer.save(wishlist=self.request.user.wishlist)
+
+    @action(detail=False, methods=["post"])
+    def add(self,request):
+        variant_id=request.data.get("product_variant")
+
+        if not variant_id:
+            return Response({"error": "product_variant is required"},status=400)
+        
+        # wishlist,_=Wishlist.objects.get_or_create(user=request.user)
+        product_variant=get_object_or_404(ProductVariant,id=variant_id)
+
+        item,created=WishlistItem.objects.get_or_create(wishlist=request.user.wishlist,product_variant=product_variant)
+
+        serializer=self.get_serializer(item)
+        return Response(serializer.data,status=201 if created else 200)
+    
+
+    @action(detail=False, methods=["post"]) #Custom endpoints require @action
+    def remove(self,request):
+        variant_id=request.data.get("product_variant")
+
+        # WishlistItem.objects.filter(Wishlist_user=request.user,product_variant_id=variant_id).delete()
+
+       
+        if not variant_id:
+            return Response(
+                {"detail": "product_variant is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        deleted, _ = WishlistItem.objects.filter(
+            wishlist__user=request.user,
+            product_variant_id=variant_id
+        ).delete()
+
+        if deleted == 0:
+            return Response(
+                {"detail": "Item not found in wishlist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(
+            {"detail": "Removed from wishlist"},
+            status=status.HTTP_200_OK
+        )

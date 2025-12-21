@@ -28,7 +28,9 @@ router.register(r"categories",CategoryViewSet,basename="category")
 router.register(r"subcategories",SubcategoryViewSet,basename="subcategory")
 router.register(r"products",ProductViewSet,basename="product")
 router.register(r"productsvariants",ProductVariantViewSet,basename="productvariant")
-router.register(r"wishlist",WishlistViewSet,basename="wishlist")
+# router.register(r"wishlist",WishlistViewSet,basename="wishlist")
+router.register(r"wishlists", WishlistViewSet, basename="wishlist")
+router.register(r"wishlistitems", WishlistItemViewSet, basename="wishlist-items")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

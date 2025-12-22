@@ -31,6 +31,11 @@ router.register(r"productsvariants",ProductVariantViewSet,basename="productvaria
 # router.register(r"wishlist",WishlistViewSet,basename="wishlist")
 router.register(r"wishlists", WishlistViewSet, basename="wishlist")
 router.register(r"wishlistitems", WishlistItemViewSet, basename="wishlist-items")
+router.register(r"cart", CartViewSet, basename="cart")
+router.register(r"cartitem", CartItemViewSet, basename="cartitem")
+router.register(r"orderitem", OrderItemViewSet, basename="orderitem")
+router.register(r"order", OrderViewSet, basename="order")
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,6 +45,7 @@ urlpatterns = [
     path("signup/", SignupRequestAPIView.as_view()),
     path("verify-otp/", OTPVerifyAPIView.as_view()),
     path("login/", LoginAPIView.as_view(), name="login"),
+    path("checkout/", CheckoutView.as_view(), name="checkout"),
 
 
 ]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)

@@ -9,7 +9,8 @@ from django.utils.text import slugify
 from .utils import generate_unique_slug
 from django.conf import settings
 
-User = settings.AUTH_USER_MODEL
+# User = settings.AUTH_USER_MODEL
+# User = get_user_model()
 # Create your models here.
 
 class User(AbstractUser):
@@ -145,7 +146,7 @@ class ProductVariant(models.Model):
 class Wishlist(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,related_name="wishlist")
     # product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="wishlistby")
-    created_at=models.DateField(default=timezone.localdate)
+    created_at=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username}'s wishlist"
@@ -153,7 +154,7 @@ class Wishlist(models.Model):
 class WishlistItem(models.Model):
     wishlist=models.ForeignKey(Wishlist,on_delete=models.CASCADE,related_name="wishlistitem",null=True,blank=True)
     product_variant=models.ForeignKey(ProductVariant,on_delete=models.CASCADE,null=True,blank=True)
-    added_at=models.DateField(default=timezone.localdate)
+    added_at=models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together=["wishlist","product_variant"]
@@ -162,20 +163,59 @@ class WishlistItem(models.Model):
     def __str__(self):
         return f"{self.product_variant.product.name} in {self.wishlist.user.username}'s wishlist"
 
+class Cart(models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE,related_name="cart")
+    created_at=models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.user}'s cart"
+    
+class CartItem(models.Model):
+    cart=models.ForeignKey(Cart,on_delete=models.CASCADE,related_name="items")
+    product_variant=models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
+    quantity=models.PositiveIntegerField(default=1)
+    added_at=models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints=[models.UniqueConstraint(fields=["cart","product_variant"],name="unique_cart_product")]
+
+    def __str__(self):
+        return f"{self.product_variant} x {self.quantity}"
 
 class Order(models.Model):
-    pass
+    STATUS_CHOICES=[
+        ("pending","Pending"),
+        ("paid","Paid"),
+        ("shipped","Shipped"),
+        ("delivered","Delivered"),
+        ("cancelled","Cancelled"),
+    ]
+
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="orders")
+    status=models.CharField(max_length=20,choices=STATUS_CHOICES,default="pending")
+    total_price=models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    created_at=models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.user}"
+
 
 class OrderItem(models.Model):
-    pass
+    order=models.ForeignKey(Order,on_delete=models.CASCADE,related_name="items")
+    product_variant=models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
+    quantity=models.PositiveIntegerField(default=1)
+    price=models.DecimalField(max_digits=10,decimal_places=2)
+
+    def __str__(self):
+        return f"{self.product_variant} x {self.quantity}"
     
+
 class Reviews(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="reviews")
     user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="reviews")
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])    
     comments=models.TextField(blank=True)
-    created_at=models.DateField(auto_now_add=True)
+    created_at=models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together=("product","user")

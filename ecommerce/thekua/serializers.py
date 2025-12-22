@@ -171,3 +171,34 @@ class WishlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wishlist
         fields = ["id", "created_at"]
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Cart
+        fields=["id","created_at"]
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product_name=serializers.ReadOnlyField(source="product_variant.product.name")
+    product_weight=serializers.ReadOnlyField(source="product_variant.weight")
+    product_price = serializers.ReadOnlyField(source="product_variant.price")
+    product_slug=serializers.ReadOnlyField(source="product_variant.product.slug")
+
+    class Meta:
+        model=CartItem
+        fields=["id","product_variant","product_name","product_slug","product_weight","product_price","quantity","added_at"]
+        read_only_fields=["id","added_at"]
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=OrderItem
+        fields=["id","product_variant","quantity","price"]
+
+        read_only_fields=["price"]
+
+class OrderSerializer(serializers.ModelSerializer):
+    items=OrderItemSerializer(many=True,read_only=True)
+    class Meta:
+        model=Order
+        fields=["id","user","status","total_price","created_at","items"]
+
+        read_only_fields=["user","total_price","created_at"]

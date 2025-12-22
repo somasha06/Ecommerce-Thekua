@@ -13,12 +13,16 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.decorators import action
 from .permissions import *
 from django.shortcuts import get_object_or_404
+from django.db import transaction
+from rest_framework.permissions import AllowAny
 
-
-# Create your views here.
 
 class SignupRequestAPIView(APIView):
+    authentication_classes = [] 
+    permission_classes = [AllowAny]
+    
     def post(self,request):
+        print("hit")
         serializer=SignupRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True) #runs validate()
         pending_user=serializer.save() #calls create()
@@ -27,6 +31,9 @@ class SignupRequestAPIView(APIView):
     
 
 class OTPVerifyAPIView(APIView):
+    authentication_classes = [] 
+    permission_classes = [AllowAny]
+
     def post(self,request):
         serializer=OTPVerifySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):# if is_valid passed than every data get stored in serializer.validated_data and when we call serializer.save() drf passes that data into create(self, validated_data)
@@ -37,6 +44,9 @@ class OTPVerifyAPIView(APIView):
     
 
 class LoginAPIView(APIView):
+    authentication_classes = [] 
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
 
@@ -205,3 +215,129 @@ class WishlistItemViewSet(ModelViewSet):
             {"detail": "Removed from wishlist"},
             status=status.HTTP_200_OK
         )
+
+class CartViewSet(ReadOnlyModelViewSet):
+    serializer_class=CartSerializer
+    permission_classes=[IsCustomer]
+
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
+    
+class CartItemViewSet(ModelViewSet):
+    serializer_class=CartItemSerializer
+    permission_classes=[IsCustomer]
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart__user=self.request.user).select_related("product_variant","product_variant__product")
+    
+    def perform_create(self, serializer):
+        # cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        serializer.save(cart=self.request.user)
+
+    @action(detail=False,methods=["post"])
+    def add(self,request):
+        variant_id=request.data.get("product_variant")
+        qty=int(request.data.get("quantity",1))
+
+        if not variant_id:
+            return Response(
+                {"detail": "product_variant is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        product_variant=get_object_or_404(ProductVariant,id=variant_id)
+
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
+
+        item,created=CartItem.objects.get_or_create(cart=cart,product_variant=product_variant,defaults={"quantity":qty},)
+
+        if not created:
+            item.quantity += qty
+            item.save()
+
+        serializer=self.get_serializer(item)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+    
+    @action(detail=False, methods=["post"])
+    def remove(self, request):
+        variant_id = request.data.get("product_variant")
+
+        if not variant_id:
+            return Response(
+                {"detail": "product_variant is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        deleted, _ = CartItem.objects.filter(
+            cart__user=request.user,
+            product_variant_id=variant_id
+        ).delete()
+
+        if deleted == 0:
+            return Response(
+                {"detail": "Item not found in cart"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response({"detail": "Removed from cart"})
+
+class OrderViewSet(ReadOnlyModelViewSet):
+    serializer_class=OrderSerializer
+    permission_classes=[IsCustomer]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+    
+    # def perform_create(self,serializer):
+    #     serializer.save(user=self.request.user)
+
+class OrderItemViewSet(ReadOnlyModelViewSet):
+    serializer_class=OrderItemSerializer
+    permission_classes=[IsCustomer]
+
+    def get_queryset(self):
+        return OrderItem.objects.filter(order__user=self.request.user).select_related("order","product_variant")
+    
+class CheckoutView(APIView):
+    permission_classes=[IsCustomer]
+
+    @transaction.atomic
+    def post(self,request):
+        cart=get_object_or_404(Cart,user=request.user)
+
+        if not cart.items.exists():
+            return Response({"detail":"Cart is empty"},status=status.HTTP_400_BAD_REQUEST)
+
+        order=Order.objects.create(user=request.user)
+
+        total_price=0
+
+        for cart_item in cart.items.select_related("product_variant"):
+            OrderItem.objects.create(order=order,product_variant=cart_item.product_variant,quantity=cart_item.quantity,price=cart_item.product_variant.price)
+
+            total_price +=(
+                cart_item.quantity*cart_item.product_variant.price
+            )
+
+        order.total_price=total_price
+        order.save()
+
+        cart.items.all().delete()
+
+        return Response(
+            {
+                "message": "Order placed successfully",
+                "order_id": order.id,
+                "total_price": total_price
+            },
+            status=status.HTTP_201_CREATED
+        )
+    
+#A user first has a Cart, and inside the cart there are CartItems that store all the selected products and quantities.
+
+# When the user clicks Checkout, the backend creates an Order, and all the cart items are copied into OrderItems inside that order.
+
+#After the order and order items are created, the user proceeds to payment.
+
+#Once the payment is successful, the order is confirmed, and the user can see it in My Orders.

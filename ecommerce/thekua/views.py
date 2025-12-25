@@ -402,7 +402,7 @@ class CreatePaymentView(APIView):
     permission_classes=[IsCustomer]
 
     def post(self,request):
-        order=get_object_or_404(Order,id=request.data.get("order_id"),user=request.user,status="pending")
+        order=get_object_or_404(Order,id=request.data.get("order_id"),user=request.user,status__in=["pending","failed"])
 
         client=razorpay.Client(auth=(settings.RAZORPAY_KEY_ID,settings.RAZORPAY_KEY_SECRET))
 
@@ -415,7 +415,17 @@ class CreatePaymentView(APIView):
         )
 
         order.razorpay_order_id=razorpay_order["id"]
+        order.razorpay_payment_id=None
+        order.status="pending"
         order.save()
+
+        PaymentHistory.objects.create(
+            user=request.user,
+            order=order,
+            razorpay_order_id=razorpay_order["id"],
+            amount=order.total_price,
+            status="created"
+        )
 
         return Response({
             "razorpay_order_id": razorpay_order["id"],
@@ -433,6 +443,11 @@ class VerifyPaymentView(APIView):
 
         order=get_object_or_404(Order,razorpay_order_id=data.get("razorpay_order_id"),user=request.user,status="pending")
 
+        payment = PaymentHistory.objects.filter(
+            razorpay_order_id=data.get("razorpay_order_id"),
+            order=order
+        ).last()
+
         client=razorpay.Client(auth=(settings.RAZORPAY_KEY_ID,settings.RAZORPAY_KEY_SECRET))
 
         try:
@@ -441,16 +456,36 @@ class VerifyPaymentView(APIView):
                 "razorpay_payment_id": data.get("razorpay_payment_id"),
                 "razorpay_signature": data.get("razorpay_signature"),
             })
+
         except SignatureVerificationError:
+            order.status="failed"
+            order.razorpay_payment_id = data.get("razorpay_payment_id")
+            order.save()
+
+            payment.status = "failed"
+            payment.razorpay_payment_id = data.get("razorpay_payment_id")
+            payment.razorpay_signature = data.get("razorpay_signature")
+            payment.error_reason = "Signature verification failed"
+            payment.save()
+
             return Response(
-                {"detail": "Payment verification failed"},
+                {"detail": "Payment failed"},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+
+        #success
         order.status="paid"
         order.razorpay_payment_id=data.get("razorpay_payment_id")
         order.save()
 
+        payment.status = "success"
+        payment.razorpay_payment_id = data.get("razorpay_payment_id")
+        payment.razorpay_signature = data.get("razorpay_signature")
+        payment.save()
+
         CartItem.objects.filter(cart__user=request.user).delete()
 
         return Response({"message":"Payment successful"},status=status.HTTP_200_OK)
+    
+

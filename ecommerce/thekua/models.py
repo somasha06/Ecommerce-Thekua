@@ -116,7 +116,7 @@ class Product(models.Model):
     description=models.CharField(max_length=500)
     seller=models.ForeignKey(User,on_delete=models.CASCADE)
     created_at=models.DateField(auto_now_add=True)
-    price=models.CharField(max_length=200,null=True,blank=True)
+    starting_from=models.CharField(max_length=200,null=True,blank=True)
     updated_at=models.DateField(auto_now=True)
     is_active=models.BooleanField(default=False)
     slug = models.SlugField(unique=True,blank=True)
@@ -195,6 +195,9 @@ class Order(models.Model):
     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default="pending")
     total_price=models.DecimalField(max_digits=10,decimal_places=2,default=0)
     created_at=models.DateTimeField(auto_now_add=True)
+
+    razorpay_order_id=models.CharField(max_length=255,blank=True,null=True)
+    razorpay_payment_id=models.CharField(max_length=255,blank=True,null=True)
 
     def __str__(self):
         return f"Order #{self.id} - {self.user}"

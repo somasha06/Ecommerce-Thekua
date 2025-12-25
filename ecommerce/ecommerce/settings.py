@@ -66,6 +66,11 @@ SIMPLE_JWT = {
 #     ]
 # }
 
+
+RAZORPAY_KEY_ID = "rzp_test_RvPnHD8ttw7uk7"
+RAZORPAY_KEY_SECRET = "m12L4vjdgChz7ILCM4HBZbAh"
+
+
 AUTH_USER_MODEL = 'thekua.User'
 
 MIDDLEWARE = [

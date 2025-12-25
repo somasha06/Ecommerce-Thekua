@@ -15,6 +15,11 @@ from .permissions import *
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from rest_framework.permissions import AllowAny
+from django.db.models import Q,Min
+from decimal import Decimal, InvalidOperation
+from django.db.models.functions import Coalesce
+import razorpay
+from razorpay.errors import SignatureVerificationError
 
 
 class SignupRequestAPIView(APIView):
@@ -323,7 +328,7 @@ class CheckoutView(APIView):
         order.total_price=total_price
         order.save()
 
-        cart.items.all().delete()
+        # cart.items.all().delete()
 
         return Response(
             {
@@ -341,3 +346,111 @@ class CheckoutView(APIView):
 #After the order and order items are created, the user proceeds to payment.
 
 #Once the payment is successful, the order is confirmed, and the user can see it in My Orders.
+
+
+class ProductViewSet(ReadOnlyModelViewSet):
+    serializer_class=ProductSerializer
+
+    def get_queryset(self):
+        queryset=Product.objects.filter(is_active=True)
+
+        search=self.request.query_params.get("search")
+        sort=self.request.query_params.get("sort")
+        min_price=self.request.query_params.get("min_price")
+        max_price=self.request.query_params.get("max_price")
+        # variant_min_price = self.request.query_params.get("variant_min_price")
+        # variant_max_price = self.request.query_params.get("variant_max_price")
+
+        # if not search:
+        #     return queryset
+
+        
+        if search:
+            q=(
+                Q(name__icontains=search) |
+                Q(description__icontains=search) |
+                Q(subcategory__name__icontains=search) |
+                Q(subcategory__category__name__icontains=search)
+            )
+
+            try:
+                price = Decimal(search)
+                q |= Q(productvariants__price=price)
+                q |= Q(productvariants__discount_price=price)
+            except InvalidOperation:
+                pass
+
+            queryset=queryset.filter(q).distinct()
+
+        if min_price:
+            queryset=queryset.filter(productvariants__price__gte=Decimal(min_price))
+        
+        if max_price:
+            queryset=queryset.filter(productvariants__price__lte=Decimal(max_price)) 
+
+
+        if sort == "price_low":
+            queryset = queryset.order_by("effective_price")
+        elif sort == "price_high":
+            queryset = queryset.order_by("-effective_price")
+        elif sort == "newest":
+            queryset = queryset.order_by("-created_at")
+
+        return queryset.distinct()
+    
+class CreatePaymentView(APIView):
+    permission_classes=[IsCustomer]
+
+    def post(self,request):
+        order=get_object_or_404(Order,id=request.data.get("order_id"),user=request.user,status="pending")
+
+        client=razorpay.Client(auth=(settings.RAZORPAY_KEY_ID,settings.RAZORPAY_KEY_SECRET))
+
+        razorpay_order=client.order.create(
+            {
+               "amount": int(order.total_price * 100),  # paise
+                "currency": "INR",
+                "payment_capture": 1 
+            }
+        )
+
+        order.razorpay_order_id=razorpay_order["id"]
+        order.save()
+
+        return Response({
+            "razorpay_order_id": razorpay_order["id"],
+            "razorpay_key": settings.RAZORPAY_KEY_ID,
+            "amount": int(order.total_price * 100),
+            "currency": "INR"
+        }, status=status.HTTP_200_OK)
+
+
+class VerifyPaymentView(APIView):
+    permission_classes=[IsCustomer]
+
+    def post(self,request):
+        data=request.data
+
+        order=get_object_or_404(Order,razorpay_order_id=data.get("razorpay_order_id"),user=request.user,status="pending")
+
+        client=razorpay.Client(auth=(settings.RAZORPAY_KEY_ID,settings.RAZORPAY_KEY_SECRET))
+
+        try:
+            client.utility.verify_payment_signature({
+                "razorpay_order_id": data.get("razorpay_order_id"),
+                "razorpay_payment_id": data.get("razorpay_payment_id"),
+                "razorpay_signature": data.get("razorpay_signature"),
+            })
+        except SignatureVerificationError:
+            return Response(
+                {"detail": "Payment verification failed"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        order.status="paid"
+        order.razorpay_payment_id=data.get("razorpay_payment_id")
+        order.save()
+
+        CartItem.objects.filter(cart__user=request.user).delete()
+
+        return Response({"message":"Payment successful"},status=status.HTTP_200_OK)

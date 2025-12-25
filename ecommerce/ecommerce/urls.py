@@ -46,7 +46,8 @@ urlpatterns = [
     path("verify-otp/", OTPVerifyAPIView.as_view()),
     path("login/", LoginAPIView.as_view(), name="login"),
     path("checkout/", CheckoutView.as_view(), name="checkout"),
-
+    path("payment/create/", CreatePaymentView.as_view()),
+    path("payment/verify/", VerifyPaymentView.as_view()),
 
 ]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

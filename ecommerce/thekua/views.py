@@ -102,9 +102,10 @@ class SubcategoryViewSet(ModelViewSet):
         return queryset
     
 class ProductViewSet(ModelViewSet):
-    # queryset=Product.objects.all()
-    # serializer_class=ProductSerializer
-    permission_classes=[IsAdminOrSeller]
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAdminOrSeller()]
+        return []
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -116,27 +117,72 @@ class ProductViewSet(ModelViewSet):
 
     def get_queryset(self):
         queryset = Product.objects.prefetch_related("productvariants")
-        
-        subCategory_id=self.request.query_params.get("subcategory")
-        if subCategory_id:
-            queryset=queryset.filter(subCategory_id=subCategory_id)
-        
-        user = self.request.user
-        if not user.is_authenticated:
-            return queryset.annotate(
-                is_wishlisted=Value(False, output_field=BooleanField())
-            )
-        
-        wishlist = user.wishlist
+        user=self.request.user
 
-        return queryset.annotate(
-            is_wishlisted=Exists(
-                WishlistItem.objects.filter(
-                    wishlist=wishlist,
-                    product_variant__product=OuterRef("pk")
+        if self.action in ["list", "retrieve"]:
+            queryset = queryset.filter(is_active=True)
+
+            search = self.request.query_params.get("search") # it's just if the url has key search than store it in search
+            sort = self.request.query_params.get("sort")
+            min_price = self.request.query_params.get("min_price")
+            max_price = self.request.query_params.get("max_price")
+            subCategory_id=self.request.query_params.get("subcategory")
+
+            if subCategory_id:
+                queryset=queryset.filter(subCategory_id=subCategory_id)
+            
+            if search:
+                q=(
+                    Q(name__icontains=search) |
+                    Q(description__icontains=search) |
+                    Q(subcategory__name__icontains=search) |
+                    Q(subcategory__category__name__icontains=search)
                 )
-            )
-        )
+
+                try:
+                    price = Decimal(search)
+                    q |= Q(productvariants__price=price)
+                    q |= Q(productvariants__discount_price=price)
+                except InvalidOperation:
+                    pass
+
+                queryset=queryset.filter(q)
+
+            if min_price:
+                queryset = queryset.filter(
+                    productvariants__price__gte=Decimal(min_price)
+                )
+
+            if max_price:
+                queryset = queryset.filter(
+                    productvariants__price__lte=Decimal(max_price)
+                )
+
+            # ↕ Sorting
+            if sort == "price_low":
+                queryset = queryset.order_by("effective_price")
+            elif sort == "price_high":
+                queryset = queryset.order_by("-effective_price")
+            elif sort == "newest":
+                queryset = queryset.order_by("-created_at")
+
+            if user.is_authenticated:
+                wishlist = user.wishlist
+                queryset = queryset.annotate( #annotate=It only adds extra information to the query result.
+                    is_wishlisted=Exists(
+                        WishlistItem.objects.filter(
+                            wishlist=wishlist,
+                            product_variant__product=OuterRef("pk")
+                        )
+                    )
+                )
+            else:
+                queryset = queryset.annotate(
+                    is_wishlisted=Value(False, output_field=BooleanField())
+                )
+
+        return queryset.distinct()
+    
     
 class ProductVariantViewSet(ModelViewSet):
     serializer_class=ProductVariantSerializer
@@ -318,11 +364,14 @@ class CheckoutView(APIView):
 
         total_price=0
 
-        for cart_item in cart.items.select_related("product_variant"):
-            OrderItem.objects.create(order=order,product_variant=cart_item.product_variant,quantity=cart_item.quantity,price=cart_item.product_variant.price)
+        #cart.items → all items
+        #cart_item → one item from that list
 
+        for cart_item in cart.items.select_related("product_variant"):    #“cart.items=All CartItem objects that belong to this cart” select_related=When fetching CartItem, also fetch the related ProductVariant in the SAME query
+            order_item=OrderItem.objects.create(order=order,product_variant=cart_item.product_variant,quantity=cart_item.quantity,price=cart_item.product_variant.price)
+                                #left order=field name from orderitem | right order=variable above defined order=order means Set the order_id of this OrderItem to the ID of the Order we just created
             total_price +=(
-                cart_item.quantity*cart_item.product_variant.price
+                order_item.quantity*order_item.price
             )
 
         order.total_price=total_price
@@ -348,55 +397,7 @@ class CheckoutView(APIView):
 #Once the payment is successful, the order is confirmed, and the user can see it in My Orders.
 
 
-class ProductViewSet(ReadOnlyModelViewSet):
-    serializer_class=ProductSerializer
 
-    def get_queryset(self):
-        queryset=Product.objects.filter(is_active=True)
-
-        search=self.request.query_params.get("search")
-        sort=self.request.query_params.get("sort")
-        min_price=self.request.query_params.get("min_price")
-        max_price=self.request.query_params.get("max_price")
-        # variant_min_price = self.request.query_params.get("variant_min_price")
-        # variant_max_price = self.request.query_params.get("variant_max_price")
-
-        # if not search:
-        #     return queryset
-
-        
-        if search:
-            q=(
-                Q(name__icontains=search) |
-                Q(description__icontains=search) |
-                Q(subcategory__name__icontains=search) |
-                Q(subcategory__category__name__icontains=search)
-            )
-
-            try:
-                price = Decimal(search)
-                q |= Q(productvariants__price=price)
-                q |= Q(productvariants__discount_price=price)
-            except InvalidOperation:
-                pass
-
-            queryset=queryset.filter(q).distinct()
-
-        if min_price:
-            queryset=queryset.filter(productvariants__price__gte=Decimal(min_price))
-        
-        if max_price:
-            queryset=queryset.filter(productvariants__price__lte=Decimal(max_price)) 
-
-
-        if sort == "price_low":
-            queryset = queryset.order_by("effective_price")
-        elif sort == "price_high":
-            queryset = queryset.order_by("-effective_price")
-        elif sort == "newest":
-            queryset = queryset.order_by("-created_at")
-
-        return queryset.distinct()
     
 class CreatePaymentView(APIView):
     permission_classes=[IsCustomer]

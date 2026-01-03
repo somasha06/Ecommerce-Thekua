@@ -1,0 +1,48 @@
+{% extends "admin/adminbase.html" %}
+
+{% load tailwind_filters %}
+
+{% block content %}
+
+<div class="flex flex-1 gap-10">
+    <div class="w-9/12">
+        <h2 class="text-xl font-semibold">Manage Category</h2>
+
+        <table class="table border w-full mt-5">
+                <thead>
+                    <tr>
+                        <th class="p-3 border">ID</th>
+                        <th class="p-3 border">Name</th>
+                        <th class="p-3 border">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}<!-- this loop takes each single item (each Category object) from that list and temporarily names it category for this one iteration.-->
+                        <tr>
+                            <td class="p-3 border">{{ forloop.counter }}</td>  <!-- category.id means “the ID (primary key) of this single category”.-->
+                            <td class="p-3 border">{{ category.name }}</td>
+                            <td class="p-3 border flex gap-3">
+                                <a href="" class=" text-white border border-black bg-blue-700 p-[2%] rounded-[50%] text-lg"><i class="fa-solid fa-eye"></i></a>
+                                <a href="{% url 'deletecategory' category.id %}" class=" text-white border border-black bg-red-500 p-[2%] rounded-[50%] text-lg"><i class="fa-solid fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+    <div class="w-3/12">
+        <div class="bg-orange-200 p-[5%] rounded">
+            <h2 class="text-xl font-semibold">Insert Category</h2>
+            
+            <form action="" method="post">
+                {% csrf_token %}
+                {{form|crispy}}
+                <input type="submit" value="insert category" class="bg-green-300 text-black px-3 py-2 rounded w-full">
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

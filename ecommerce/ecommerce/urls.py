@@ -21,6 +21,7 @@ from rest_framework.routers import DefaultRouter
 from django.conf import settings
 from django.conf.urls.static import static
 from thekua.views import *
+from thekua.adminviews import *
 
 router = routers.DefaultRouter()
 router.register(r"address", AddressViewSet, basename="address")
@@ -38,7 +39,7 @@ router.register(r"order", OrderViewSet, basename="order")
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('superadmin/', admin.site.urls),
     # path("", include("thekua.urls")),
     path('api-auth/', include('rest_framework.urls')),
     path("api/", include(router.urls)),
@@ -48,6 +49,23 @@ urlpatterns = [
     path("checkout/", CheckoutView.as_view(), name="checkout"),
     path("payment/create/", CreatePaymentView.as_view()),
     path("payment/verify/", VerifyPaymentView.as_view()),
+
+    path("",home,name="homepage"),
+    path("p/<int:id>",viewproduct,name="viewproduct"),
+    path("admin/",dashboard,name="dashboardpage"),
+    path("admin/category",managecategory,name="managecategory"),
+    path("admin/category/<int:id>/",deletecategory,name="deletecategory"),
+    path("admin/subcategory",managesubcategory,name="managesubcategory"),
+    path("admin/subcategory/<int:id>/",deletesubcategory,name="deletesubcategory"),
+    path("admin/product",insertproduct,name="insertproduct"),
+    path("admin/product/<int:id>/",deleteproduct,name="deleteproduct"),
+    path("admin/manageproduct",manageproduct,name="manageproduct"),
+    path("admin/seller",allseller,name="allseller"),
+    path("admin/customer", allcustomer, name="allcustomer"),
+    path("admin/customer/<int:user_id>/wishlist/",customerwishlist, name="customerwishlist"),
+    path("admin/customer/<int:user_id>/orders/",customerorder, name="customerorder"),
+    path("admin/order/<int:order_id>/items/",orderitems,name="orderitems"),
+    path("admin/orders/paid/",paidorders, name="paidorders"),
 
 ]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

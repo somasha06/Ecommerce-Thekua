@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <div class="flex flex-1 w-full h-16 bg-orange-200 px-[5%] justify-between items-center">
+        <div class="bg-brown h-100 w-100 border border-green flex">
+            <img src="" alt="">
+            <a href="" class="text-black text-xl">Admin Panel</a>
+        </div>
+
+        <div class="flex flex-1 items-center justify-center gap-4 text-xl">
+            <a href="">Home</a>
+            <a href="">Shop</a>
+            <a href="">About-us</a>
+            <a href="">Contact-us</a>
+            <a href="">Track order</a>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="flex items-center bg-white border border-gray-500 justify-center p-2">
+                <input type="text" placeholder="explore your tangy sweets" class="text-sm px-2 outline-none">
+                <a href=""><i class="fa-solid fa-magnifying-glass flex items-center"></i></a>
+            </div>
+            <div class="flex gap-5">
+                <a href=""><i class="fa-solid fa-user cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
+                <a href=""><i class="fa-regular fa-heart cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
+                <a href=""><i class="fa-solid fa-cart-shopping cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
+                <a href="" class="flex items-center text-xl gap-1">logout</a>
+                <a href="" class="flex items-center text-xl gap-1">login</a>
+            </div>
+        </div>
+    </div>
+
+
+    {% if subcategories %}
+    <nav class="flex flex-1 mt-8 p-2 bg-orange-200 ">
+    {% for subcategory in subcategories %}
+    <div class="px-[10%]">
+        <div class="bg-amber-700 font-semibold text-orange-100 px-3 py-2 rounded-lg hover:shadow-lg hover:cursor-pointer">
+            <a href="" >{{subcategory.name}}</a>        
+        </div>
+    </div>
+    {% endfor %}
+    </nav>
+    {% endif %}
+</body>
+</html>
+
+
+{% block content %}
+
+{% endblock %}

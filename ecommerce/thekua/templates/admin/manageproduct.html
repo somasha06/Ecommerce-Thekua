@@ -1,0 +1,49 @@
+{% extends "admin/adminbase.html" %}
+
+
+{% block content %}
+
+<div class="flex flex-1 justify-between items-center ">
+    <h2 class="text-2xl font-semibold">Manage Products</h2>
+    <a href="{% url 'insertproduct' %}" class="bg-green-600 text-white px-3 py-2 rounded">Insert Product</a>
+</div>
+    <table class="w-full mt-5">
+        <thead>
+            <tr>
+                <td class="p-3 border">ID</td>
+                <td class="p-3 border">Name</td>
+                <td class="p-3 border">subcategory</td>
+                {% comment %} <td class="p-3 border"></td> {% endcomment %}
+                <td class="p-3 border">Image</td>
+                <td class="p-3 border">Price</td>
+                <td class="p-3 border">Action</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td class="p-3 border">{{forloop.counter}}</td>
+                <td class="p-3 border">{{product.name}}</td>
+                <td class="p-3 border">{{product.subcategory}}</td>
+                {% comment %} <td class="p-3 border">{{product.}}</td> {% endcomment %}
+                <td class="p-3 border">
+                    <img src="{{product.image.url}}" width="100px" alt="">
+                </td>
+                <td class="p-3 border">{{product.starting_from}} </td>
+                <td class="p-3 border">
+                    <div class="flex gap-1">
+                        <a href="{% url 'deleteproduct' product.id %}" class="bg-red-600 hover:bg-red-700 text-white rounded text-sm px-3 py-2">Delete</a>
+                        <a href="" class="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm px-3 py-2">Edit</a>
+                        <a href="{% url 'viewproduct' product.id %}" class="bg-green-600 hover:bg-green-700 text-white rounded text-sm px-3 py-2">View</a>
+                    </div>
+                </td>
+            </tr>
+
+            {% endfor %}
+            <h2></h2>
+            
+        </tbody>
+    </table>
+
+
+{% endblock %}

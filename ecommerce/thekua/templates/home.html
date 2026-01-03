@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="flex flex-1 mt-8">
+    <div class="grid grid-cols-5 gap-5 px-[10%]">
+        {% for product in products %}
+        <a href="{% url 'viewproduct' product.id %}">
+            <div class="bg-orange-200 rounded-lg hover:cursor-pointer">
+                <img src="{{product.image.url}}" class="w-full rounded-t-lg border-black" alt="">
+                <div class="p-2 text-center">
+                    <h2 class="font-bold truncate">{{product.title}}</h2>
+                    <h2 class="text-sm">Brand:{{product.brand}} </h2>
+                    <h2 class="font-bold"><del class="text-black-400">{{product.price}}</del>{{product.discount_price}} </h2>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    
+    </div>
+</section>
+
+
+
+{% endblock %}

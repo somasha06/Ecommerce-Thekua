@@ -1,0 +1,21 @@
+{% extends "admin/adminbase.html" %}
+{% load crispy_forms_tags %}
+{% load tailwind_filters %}
+
+{% block content %}
+
+    <div class="flex flex-col">
+        <h2 class="text-2xl font-bold">Insert product</h2>
+        
+            <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{form|crispy}}
+                <div class="mb-3">
+                    <input type="submit" value="insert product" class="bg-green-200 text-black w-full rounded px-3 py-2">
+                </div>
+            </form>
+        
+    </div>
+
+
+{% endblock %}

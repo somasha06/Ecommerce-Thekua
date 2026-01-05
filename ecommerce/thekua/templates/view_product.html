@@ -2,25 +2,106 @@
 
 {% block content %}
 
-
-<div class="flex flex-1 px-[10%]">
-    <div class="w-6/12">
-        <img src="{{product.image.url}}" alt="" class="w-full p-20">
-    </div>
-    <div class="w-6/12 space-y-4 px-5 mt-20">
-        <h1 class="text-amber-700 font-semibold text-2xl">{{product.name}}</h1>
-        <h2 class="text-sm font-bold text-amber-500">{{product.subcategory}}</h2>
-        <h2 class="text-2xl font-bold text-amber-500">Brand: {{product.seller}}</h2>
-        <div class="text-sm mt-10">
-            <h2 class="text-lg font-bold text-amber-800">Description</h2>
-            <p class="line-clamp-5 mt-2 text-amber-500">{{product.description}}</p>
+<!-- Breadcrumbs -->
+<nav class="bg-slate-50 border-b border-slate-200 py-3">
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="flex items-center gap-2 text-sm text-slate-500">
+            <a href="/" class="hover:text-orange-600">Home</a>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            <span class="text-slate-900 font-medium">{{product.name}}</span>
         </div>
-        {% comment %} <div class="flex flex-1 gap-3">
-            <a href="" class="border text-amber-800 border-red-500 hover:bg-red-500 hover:text-white gap-2 px-3 py-2 rounded-full flex items-center"><i class="fa-solid fa-heart"></i> wishlist</a>
-            <a href="" class="border text-amber-800 border-red-500 hover:bg-red-500 hover:text-white gap-2 px-3 py-2 rounded-full flex items-center"><i class="fa-solid fa-cart-shopping"></i> Add to Cart</a>
-            <a href="" class="border text-amber-800 border-red-500 hover:bg-red-500 hover:text-white gap-2 px-3 py-2 rounded-full flex items-center"><i class="fa-regular fa-handshake"></i>Buy now</a>
-        </div> {% endcomment %}
     </div>
-</div>
+</nav>
+
+<section class="py-12 lg:py-20">
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+            <!-- Product Image -->
+            <div class="space-y-6">
+                <div
+                    class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden aspect-square flex items-center justify-center p-8 relative group">
+                    {% if product.image %}
+                    <img src="{{product.image.url}}" alt="{{product.name}}"
+                        class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                    {% else %}
+                    <i class="fa-regular fa-image text-6xl text-slate-200"></i>
+                    {% endif %}
+
+                    <span
+                        class="absolute top-6 left-6 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                        {{ product.subcategory|default:"Authentic" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="flex flex-col justify-center">
+                <div class="mb-2 flex items-center gap-2">
+                    <span
+                        class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-wider">{{
+                        product.seller|default:"Thekua Brand" }}</span>
+                </div>
+
+                <h1 class="text-3xl md:text-5xl font-bold text-slate-900 font-heading leading-tight mb-4">
+                    {{product.name}}</h1>
+
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="flex text-amber-400 text-sm">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex items-baseline gap-4">
+                        {% if product.discount_price %}
+                        <span class="text-4xl font-bold text-gray-900">₹{{product.discount_price}}</span>
+                        <span class="text-xl text-slate-400 line-through">₹{{product.price}}</span>
+                        <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">-20% OFF</span>
+                        {% else %}
+                        <span class="text-4xl font-bold text-gray-900">₹{{product.price}}</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2">Inclusive of all taxes</p>
+                </div>
+
+                <div class="prose prose-slate hover:prose-a:text-orange-600 mb-10 text-slate-600 leading-relaxed">
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 font-heading">Description</h3>
+                    <p>{{product.description}}</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-slate-100">
+                    <div class="flex flex-1 gap-2">
+                        <button
+                            class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                        <button
+                            class="flex-1 bg-slate-900 text-white font-bold rounded-xl px-8 py-3 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-95 transition-all">
+                            Add to Cart
+                        </button>
+                    </div>
+                    <button
+                        class="flex-1 bg-orange-500 text-white font-bold rounded-xl px-8 py-3 hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 active:scale-95 transition-all">
+                        Buy Now
+                    </button>
+                </div>
+
+                <div
+                    class="mt-8 flex items-center justify-center gap-6 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-emerald-500 text-lg"></i> Secure Payment
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-truck-fast text-blue-500 text-lg"></i> Fast Delivery
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 {% endblock %}

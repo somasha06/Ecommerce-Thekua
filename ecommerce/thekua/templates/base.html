@@ -1,59 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{% block title %}Thekua | Authentic Indian Sweets{% endblock %}</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Fonts: Plus Jakarta Sans (Main) & Playfair Display (Headings) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .font-heading {
+            font-family: 'Playfair Display', serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            right: 0;
+            background-color: #ea580c;
+            transition: width 0.3s ease-out;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+    </style>
 </head>
-<body>
 
-    <div class="flex flex-1 w-full h-16 bg-orange-200 px-[5%] justify-between items-center">
-        <div class="bg-brown h-100 w-100 border border-green flex">
-            <img src="" alt="">
-            <a href="" class="text-black text-xl">Admin Panel</a>
-        </div>
+<body class="bg-[#faf9f6] text-slate-800 flex flex-col min-h-screen selection:bg-orange-200 selection:text-orange-900">
 
-        <div class="flex flex-1 items-center justify-center gap-4 text-xl">
-            <a href="">Home</a>
-            <a href="">Shop</a>
-            <a href="">About-us</a>
-            <a href="">Contact-us</a>
-            <a href="">Track order</a>
-        </div>
+    <!-- Navbar -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-orange-100 shadow-sm">
+        <div class="container mx-auto px-4 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="flex items-center gap-2 group">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
+                    <span class="text-white font-bold text-xl font-heading">T</span>
+                </div>
+                <span
+                    class="text-2xl font-bold font-heading text-slate-800 group-hover:text-orange-600 transition-colors">Thekua</span>
+            </a>
 
-        <div class="flex items-center gap-6">
-            <div class="flex items-center bg-white border border-gray-500 justify-center p-2">
-                <input type="text" placeholder="explore your tangy sweets" class="text-sm px-2 outline-none">
-                <a href=""><i class="fa-solid fa-magnifying-glass flex items-center"></i></a>
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-8 font-medium text-slate-600">
+                <a href="/" class="hover:text-orange-600 transition-colors nav-link">Home</a>
+                <a href="/" class="hover:text-orange-600 transition-colors nav-link">Shop</a>
+                <a href="/" class="hover:text-orange-600 transition-colors nav-link">About Us</a>
+                <a href="/" class="hover:text-orange-600 transition-colors nav-link">Contact</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block">
+                    <input type="text" placeholder="Search sweets..."
+                        class="pl-10 pr-4 py-2 bg-slate-50 border border-transparent rounded-full focus:bg-white focus:border-orange-500/20 focus:ring-4 focus:ring-orange-500/10 text-sm w-48 transition-all hover:bg-white hover:border-slate-200">
+                    <i
+                        class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a href=""
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all relative">
+                        <i class="fa-regular fa-heart text-lg"></i>
+                    </a>
+                    <a href=""
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all relative">
+                        <i class="fa-solid fa-cart-shopping text-lg"></i>
+                        <span
+                            class="absolute top-1 right-0 w-4 h-4 bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white">2</span>
+                    </a>
+
+                    {% if user.is_authenticated %}
+                    <a href=""
+                        class="ml-2 w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center hover:shadow-lg hover:shadow-slate-900/20 transition-all">
+                        <span class="font-bold text-sm">{{ user.username|slice:":1"|upper }}</span>
+                    </a>
+                    {% else %}
+                    <a href=""
+                        class="ml-2 px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 transition-all">
+                        Login
+                    </a>
+                    {% endif %}
+                </div>
             </div>
-            <div class="flex gap-5">
-                <a href=""><i class="fa-solid fa-user cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
-                <a href=""><i class="fa-regular fa-heart cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
-                <a href=""><i class="fa-solid fa-cart-shopping cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
-                <a href="" class="flex items-center text-xl gap-1">logout</a>
-                <a href="" class="flex items-center text-xl gap-1">login</a>
+        </div>
+
+        <!-- Category Strip (Optional) -->
+        {% if subcategories %}
+        <div class="border-t border-slate-50 bg-white hidden md:block">
+            <div class="container mx-auto px-4 lg:px-8 py-3 flex gap-6 overflow-x-auto no-scrollbar justify-center">
+                {% for sub in subcategories %}
+                <a href=""
+                    class="text-sm font-medium text-slate-500 hover:text-orange-600 whitespace-nowrap transition-colors flex items-center gap-2">
+                    {% if sub.image %}
+                    <img src="{{sub.image.url}}" class="w-5 h-5 rounded-full object-cover">
+                    {% endif %}
+                    {{ sub.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-16 mt-20">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                            <span class="text-white font-bold text-lg font-heading">T</span>
+                        </div>
+                        <span class="text-2xl font-bold font-heading text-white">Thekua</span>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed">Bringing authentic flavors of India to your
+                        doorstep. Handmade with love and tradition.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-6 font-heading">Shop</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-orange-400 transition-colors">All Products</a></li>
+                        <li><a href="#" class="hover:text-orange-400 transition-colors">Best Sellers</a></li>
+                        <li><a href="#" class="hover:text-orange-400 transition-colors">Gift Boxes</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-6 font-heading">Support</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-orange-400 transition-colors">Track Order</a></li>
+                        <li><a href="#" class="hover:text-orange-400 transition-colors">Shipping Policy</a></li>
+                        <li><a href="#" class="hover:text-orange-400 transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-6 font-heading">Stay Updated</h4>
+                    <form class="flex gap-2">
+                        <input type="email" placeholder="Your email"
+                            class="bg-slate-800 border-none rounded-lg px-4 py-2 text-sm text-white focus:ring-2 focus:ring-orange-500 w-full placeholder-slate-500">
+                        <button
+                            class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div
+                class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
+                <p>&copy; 2026 Thekua Ecommerce. All rights reserved.</p>
+                <div class="flex gap-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global Loader -->
+    <div id="page-loader"
+        class="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none"
+        aria-hidden="true">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 transform scale-95 transition-transform duration-300"
+            id="loader-content">
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin">
+                </div>
+                <div
+                    class="absolute inset-0 flex items-center justify-center font-bold text-orange-600 text-xl font-heading animate-pulse">
+                    T</div>
             </div>
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('page-loader');
+            const loaderContent = document.getElementById('loader-content');
 
-    {% if subcategories %}
-    <nav class="flex flex-1 mt-8 p-2 bg-orange-200 ">
-    {% for subcategory in subcategories %}
-    <div class="px-[10%]">
-        <div class="bg-amber-700 font-semibold text-orange-100 px-3 py-2 rounded-lg hover:shadow-lg hover:cursor-pointer">
-            <a href="" >{{subcategory.name}}</a>        
-        </div>
-    </div>
-    {% endfor %}
-    </nav>
-    {% endif %}
+            function showLoader() {
+                loader.classList.remove('opacity-0', 'pointer-events-none');
+                loaderContent.classList.remove('scale-95');
+                loaderContent.classList.add('scale-100');
+            }
+
+            function hideLoader() {
+                loader.classList.add('opacity-0', 'pointer-events-none');
+                loaderContent.classList.add('scale-95');
+                loaderContent.classList.remove('scale-100');
+            }
+
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (link && link.href && !link.href.startsWith('javascript:') && !link.href.includes('#') && link.target !== '_blank' && link.hostname === window.location.hostname && !e.ctrlKey && !e.metaKey) {
+                    showLoader();
+                }
+            });
+
+            window.addEventListener('pageshow', (event) => {
+                if (event.persisted) hideLoader();
+            });
+            hideLoader();
+        });
+    </script>
 </body>
+
 </html>
-
-
-{% block content %}
-
-{% endblock %}

@@ -1,26 +1,170 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<section class="flex flex-1 mt-8">
-    <div class="grid grid-cols-5 gap-5 px-[10%]">
-        {% for product in products %}
-        <a href="{% url 'viewproduct' product.id %}">
-            <div class="bg-orange-200 rounded-lg hover:cursor-pointer">
-                <img src="{{product.image.url}}" class="w-full rounded-t-lg border-black" alt="">
-                <div class="p-2 text-center">
-                    <h2 class="font-bold truncate">{{product.title}}</h2>
-                    <h2 class="text-sm">Brand:{{product.brand}} </h2>
-                    <h2 class="font-bold"><del class="text-black-400">{{product.price}}</del>{{product.discount_price}} </h2>
-                </div>
-            </div>
-        </a>
-        {% endfor %}
+<!-- Hero Section -->
+<section class="relative bg-orange-50/50 py-20 lg:py-28 overflow-hidden">
+    <div
+        class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-orange-200/20 rounded-full blur-3xl">
     </div>
-    
+    <div
+        class="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl">
+    </div>
+
+    <div class="container mx-auto px-4 lg:px-8 relative z-10 text-center max-w-4xl mx-auto">
+        <span
+            class="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-bold tracking-wider mb-6 animate-fade-in-up">AUTHENTIC
+            TASTE</span>
+        <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 font-heading leading-tight animate-fade-in-up"
+            style="animation-delay: 0.1s;">
+            Rediscover the <br><span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Traditional
+                Flavors</span>
+        </h1>
+        <p class="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up"
+            style="animation-delay: 0.2s;">
+            Handcrafted Thekua and Indian sweets made with pure ghee and organic ingredients. A taste of nostalgia in
+            every bite.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style="animation-delay: 0.3s;">
+            <a href="#products"
+                class="px-8 py-4 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-1 transition-all duration-300">
+                Shop Now
+            </a>
+            <a href="#about"
+                class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all duration-300">
+                Our Story
+            </a>
+        </div>
     </div>
 </section>
 
+<!-- Products Grid -->
+<section id="products" class="py-20">
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="flex items-end justify-between mb-12">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-800 font-heading">Featured Delights</h2>
+                <p class="text-slate-500 mt-2">Curated selection of our finest sweets</p>
+            </div>
+            <a href="#"
+                class="hidden md:flex items-center gap-2 text-orange-600 font-medium hover:gap-3 transition-all">View
+                all <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for product in products %}
+            <a href="{% url 'viewproduct' product.id %}" class="group block">
+                <div
+                    class="bg-white rounded-2xl overflow-hidden border border-slate-100 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 relative">
+                    <!-- Image -->
+                    <div class="aspect-[4/3] overflow-hidden bg-slate-50 relative">
+                        {% if product.image %}
+                        <img src="{{product.image.url}}"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            alt="{{product.name}}">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-slate-300"><i
+                                class="fa-regular fa-image text-3xl"></i></div>
+                        {% endif %}
 
+                        <!-- Floating Action -->
+                        <button
+                            class="absolute bottom-3 right-3 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white transition-colors translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 duration-300 z-10">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-xs font-bold text-orange-500 uppercase tracking-wide">{{ product.seller.username|default:"Authentic" }}</p>
+                            <span class="flex items-center gap-1 text-xs font-bold text-slate-400"><i
+                                    class="fa-solid fa-star text-amber-400"></i> 4.8</span>
+                        </div>
+                        <h3
+                            class="font-bold text-slate-800 text-lg mb-1 group-hover:text-orange-600 transition-colors line-clamp-1 font-heading">
+                            {{product.name}}</h3>
+
+                        <div class="flex items-baseline gap-2 mt-3">
+                            {% if product.discount_price %}
+                            <span class="text-lg font-bold text-slate-900">₹{{product.discount_price}}</span>
+                            <span class="text-sm text-slate-400 line-through">₹{{product.starting_from}}</span>
+                            {% else %}
+                            <span class="text-lg font-bold text-slate-900">₹{{product.starting_from}}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="col-span-full py-20 text-center text-slate-400">
+                <i class="fa-solid fa-cookie-bite text-4xl mb-4 opacity-30"></i>
+                <p>No products available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-12 text-center md:hidden">
+            <a href="#" class="btn btn-outline">View All Products</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="py-20 bg-slate-900 text-white relative overflow-hidden">
+    <!-- Decorative pattern -->
+    <div class="absolute inset-0 opacity-10"
+        style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 32px 32px;"></div>
+
+    <div class="container mx-auto px-4 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+            <div class="p-6">
+                <div
+                    class="w-16 h-16 mx-auto bg-slate-800 rounded-2xl flex items-center justify-center text-orange-400 text-2xl mb-6 shadow-lg shadow-black/20">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3 font-heading">100% Organic</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Made with locally sourced, chemical-free ingredients
+                    for the purest taste.</p>
+            </div>
+            <div class="p-6">
+                <div
+                    class="w-16 h-16 mx-auto bg-slate-800 rounded-2xl flex items-center justify-center text-orange-400 text-2xl mb-6 shadow-lg shadow-black/20">
+                    <i class="fa-solid fa-fire-burner"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3 font-heading">Traditional Recipe</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Cooked slowly in earthen pots using recipes passed
+                    down through generations.</p>
+            </div>
+            <div class="p-6">
+                <div
+                    class="w-16 h-16 mx-auto bg-slate-800 rounded-2xl flex items-center justify-center text-orange-400 text-2xl mb-6 shadow-lg shadow-black/20">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3 font-heading">Fresh Delivery</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Made to order and shipped immediately to ensure
+                    maximum freshness.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+</style>
 {% endblock %}

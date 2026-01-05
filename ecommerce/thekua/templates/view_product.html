@@ -38,8 +38,7 @@
             <div class="flex flex-col justify-center">
                 <div class="mb-2 flex items-center gap-2">
                     <span
-                        class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-wider">{{
-                        product.seller|default:"Thekua Brand" }}</span>
+                        class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-wider">{{ product.seller|default:"Thekua Brand" }}</span>
                 </div>
 
                 <h1 class="text-3xl md:text-5xl font-bold text-slate-900 font-heading leading-tight mb-4">
@@ -59,10 +58,10 @@
                     <div class="flex items-baseline gap-4">
                         {% if product.discount_price %}
                         <span class="text-4xl font-bold text-gray-900">₹{{product.discount_price}}</span>
-                        <span class="text-xl text-slate-400 line-through">₹{{product.price}}</span>
+                        <span class="text-xl text-slate-400 line-through">₹{{product.starting_from}}</span>
                         <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">-20% OFF</span>
                         {% else %}
-                        <span class="text-4xl font-bold text-gray-900">₹{{product.price}}</span>
+                        <span class="text-4xl font-bold text-gray-900">₹{{product.starting_from}}</span>
                         {% endif %}
                     </div>
                     <p class="text-sm text-slate-500 mt-2">Inclusive of all taxes</p>

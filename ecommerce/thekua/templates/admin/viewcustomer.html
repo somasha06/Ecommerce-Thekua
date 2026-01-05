@@ -1,46 +1,92 @@
 {% extends 'admin/adminbase.html' %}
 {% block content %}
 
-<div class="mt-10 w-9/12 px-20">
-        <h2 class="text-xl font-bold mb-4 text-gray-700">Uers Members</h2>
+<div class="space-y-6 animate-fade-in-up">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Customer Database</h2>
+            <p class="text-slate-500 text-sm mt-1">View and manage registered customers.</p>
+        </div>
+    </div>
 
-        <table class="min-w-full bg-white">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr>
-                        <th class="py-2 px-4 border-b">ID</th>
-                        <th class="py-2 px-4 border-b">Customer Name</th>
-                        <th class="py-2 px-4 border-b">email</th>
-                        <th class="py-2 px-4 border-b">Wishlist</th>
-                        <th class="py-2 px-4 border-b">orders</th>
-                        {% comment %} <th class="py-2 px-4 border-b"></th> {% endcomment %}
-                        <th class="py-2 px-4 border-b">Action</th>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th
+                            class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center w-16">
+                            ID</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                            Activity</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                            Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-100">
                     {% for customer in customers %}
-                    <tr>
-                        <td class="py-2 px-4 border-b text-center">{{ forloop.counter }}</td>
-                        <td class="py-2 px-4 border-b text-center">{{customer.user.username}}</td>
-                        <td class="py-2 px-4 border-b text-center">{{customer.user.email}}</td>
-                        <td class="py-2 px-4 border-b text-center">{{customer.wishlist_count}} items <a href="{% url 'customerwishlist' customer.user.id %}">View</a></td>
-                        <td class="py-2 px-4 border-b text-center">{{customer.order_count}} orders <a href="{% url 'customerorder' customer.user.id %}">View</a></td>
-                        {% comment %} <td class="py-2 px-4 border-b text-center">{{customer.user.}}</td> {% endcomment %}
-                        {% comment %} <td class="py-2 px-4 border-b text-center">{{customer.total_tickets}}</td> {% endcomment %}
-                        <td class="py-2 px-4 border-b text-center">
-                            <a href="" class="font-semibold">view profile</a>
+                    <tr class="hover:bg-slate-50/80 transition-colors group">
+                        <td class="py-4 px-6 text-sm font-mono text-slate-600 text-center">{{ forloop.counter }}</td>
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                                    {{ customer.user.username|slice:":1"|upper }}
+                                </div>
+                                <span class="text-sm font-medium text-slate-800">{{ customer.user.username }}</span>
+                            </div>
                         </td>
+                        <td class="py-4 px-6 text-sm text-slate-600">{{ customer.user.email }}</td>
+                        <td class="py-4 px-6 text-center">
+                            <div class="flex items-center justify-center gap-4">
+                                <a href="{% url 'customerwishlist' customer.user.id %}"
+                                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-medium hover:bg-rose-100 transition-colors"
+                                    title="View Wishlist">
+                                    <i class="fa-regular fa-heart"></i> {{ customer.wishlist_count }}
+                                </a>
+                                <a href="{% url 'customerorder' customer.user.id %}"
+                                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition-colors"
+                                    title="View Orders">
+                                    <i class="fa-solid fa-bag-shopping"></i> {{ customer.order_count }}
+                                </a>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <a href=""
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold tracking-wide uppercase text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-all">
+                                Profile
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-12 text-center text-slate-500">No customers found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
     </div>
+</div>
 
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+</style>
 
 {% endblock %}
-
-
-
-
-
-
-

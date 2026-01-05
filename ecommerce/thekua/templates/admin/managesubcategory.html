@@ -1,52 +1,137 @@
 {% extends "admin/adminbase.html" %}
-
 {% load tailwind_filters %}
 
 {% block content %}
-
-<div class="flex flex-1 gap-10">
-    <div class="w-9/12">
-        <h2 class="text-xl font-semibold">Manage SubCategory</h2>
-
-        <table class="table border w-full mt-5">
-                <thead>
-                    <tr>
-                        <th class="p-3 border">ID</th>
-                        <th class="p-3 border">Name</th>
-                        <th class="p-3 border">Image</th>
-                        <th class="p-3 border">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for subcategory in subcategories %}<!-- this loop takes each single item (each Category object) from that list and temporarily names it category for this one iteration.-->
-                        <tr>
-                            <td class="p-3 border">{{ forloop.counter }}</td>  <!-- category.id means “the ID (primary key) of this single category”.-->
-                            <td class="p-3 border">{{ subcategory.name }}</td>
-                            <td class="p-3 border">
-                                <img src="{{subcategory.image.url}}" width="100px" alt="">
-                            </td>
-                            <td class="p-3 border flex gap-3">
-                                <a href="" class=" text-white border border-black bg-blue-700 p-[2%] rounded-[50%] text-lg"><i class="fa-solid fa-eye"></i></a>
-                                <a href="{% url 'deletesubcategory' subcategory.id %}" class=" text-white border border-black bg-red-500 p-[2%] rounded-[50%] text-lg"><i class="fa-solid fa-trash"></i></a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="space-y-6 animate-fade-in-up">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Sub-Categories</h2>
+            <p class="text-slate-500 text-sm mt-1">Organize your categories into sub-groups.</p>
+        </div>
     </div>
-    <div class="w-3/12">
-        <div class="bg-orange-200 p-[5%] rounded">
-            <h2 class="text-xl font-semibold">Insert Subcategory</h2>
-            
-            <form action="" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{form|crispy}}
-                <input type="submit" value="insert subcategory" class="bg-green-300 text-black px-3 py-2 rounded w-full">
-            </form>
 
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- List Section -->
+        <div class="lg:col-span-3 order-2 lg:order-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-semibold text-slate-700">All Sub-Categories</h3>
+                    <div class="relative">
+                        <i
+                            class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" placeholder="Search..."
+                            class="pl-8 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all w-64">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-20">ID
+                                </th>
+                                <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Name &
+                                    Image</th>
+                                <th
+                                    class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right w-40">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for subcategory in subcategories %}
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
+                                <td class="py-4 px-6 text-sm text-slate-500 font-mono">#{{ forloop.counter }}</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0">
+                                            {% if subcategory.image %}
+                                            <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}"
+                                                class="w-full h-full object-cover">
+                                            {% else %}
+                                            <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                                <i class="fa-solid fa-image"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-800">{{ subcategory.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all"
+                                            title="View Details">
+                                            <i class="fa-solid fa-eye text-xs"></i>
+                                        </button>
+                                        <a href="{% url 'deletesubcategory' subcategory.id %}"
+                                            class="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 hover:scale-105 transition-all"
+                                            title="Delete" onclick="return confirm('Are you sure?');">
+                                            <i class="fa-solid fa-trash text-xs"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="py-12 text-center text-slate-400">No sub-categories found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Form -->
+        <div class="lg:col-span-1 order-1 lg:order-2">
+            <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 p-6 sticky top-24">
+                <div class="mb-6 flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/20">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Add New</h3>
+                        <p class="text-xs text-slate-500">Create a sub-category</p>
+                    </div>
+                </div>
+
+                <form action="" method="post" enctype="multipart/form-data" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        {{ form|crispy }}
+                        <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                            <i class="fa-solid fa-image text-blue-400"></i> Image is required.
+                        </p>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center items-center py-3 px-4 rounded-xl shadow-lg shadow-slate-900/20 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all">
+                        Create Sub-Category
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+</style>
 {% endblock %}

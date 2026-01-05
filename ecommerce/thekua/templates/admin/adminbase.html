@@ -1,64 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Admin Dashboard | Thekua</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body>
 
-    <div class="flex flex-1 w-full h-16 bg-orange-200 px-[5%] justify-between items-center">
-        <div class="bg-brown h-100 w-100 border border-green flex">
-            <img src="" alt="">
-            <a href="" class="text-black text-xl">Admin Panel</a>
-        </div>
+<body class="bg-gray-50 text-slate-800 antialiased selection:bg-orange-200 selection:text-orange-900">
 
-        <div class="flex flex-1 items-center justify-center gap-4 text-xl">
-            <a href="">Home</a>
-            <a href="">Shop</a>
-            <a href="">About-us</a>
-            <a href="">Contact-us</a>
-            <a href="">Track order</a>
-        </div>
-
-        <div class="flex items-center gap-6">
-            <div class="flex items-center bg-white border border-gray-500 justify-center p-2">
-                <input type="text" placeholder="explore your tangy sweets" class="text-sm px-2 outline-none">
-                <a href=""><i class="fa-solid fa-magnifying-glass flex items-center"></i></a>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            class="w-72 bg-slate-900 text-slate-300 flex flex-col shadow-2xl transition-all duration-300 relative z-20">
+            <!-- Brand -->
+            <div class="h-20 flex items-center px-8 border-b border-slate-800/50 bg-slate-950">
+                <a href="{% url 'dashboardpage' %}" class="flex items-center gap-3 group">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-all">
+                        <span class="text-white font-bold text-lg">T</span>
+                    </div>
+                    <span
+                        class="text-xl font-bold tracking-tight text-white group-hover:text-orange-400 transition-colors">Thekua<span
+                            class="text-slate-500 font-normal">Admin</span></span>
+                </a>
             </div>
-            <div class="flex gap-5">
-                <a href=""><i class="fa-solid fa-user cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
-                <a href=""><i class="fa-regular fa-heart cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
-                <a href=""><i class="fa-solid fa-cart-shopping cursor-pointer hover:text-orange-700 text-xl border rounded-[50%] border-black p-1 bg-green-200"></i></a>
-                <a href="" class="flex items-center text-xl gap-1">logout</a>
-                <a href="" class="flex items-center text-xl gap-1">login</a>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+                <p class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Main</p>
+                <nav class="space-y-1">
+                    <a href="{% url 'dashboardpage' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'dashboardpage' %}bg-orange-600 text-white shadow-lg shadow-orange-900/20 hover:bg-orange-700{% endif %}">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
+                    </a>
+                </nav>
+
+                <p class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-8 mb-2">Catalog</p>
+                <nav class="space-y-1">
+                    <a href="{% url 'managecategory' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'managecategory' %}bg-slate-800 text-white{% endif %}">
+                        <i class="fa-solid fa-layer-group w-5 text-center"></i> Categories
+                    </a>
+                    <a href="{% url 'managesubcategory' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'managesubcategory' %}bg-slate-800 text-white{% endif %}">
+                        <i class="fa-solid fa-list-ul w-5 text-center"></i> Sub-Categories
+                    </a>
+                    <a href="{% url 'manageproduct' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'manageproduct' %}bg-slate-800 text-white{% endif %}">
+                        <i class="fa-solid fa-box-open w-5 text-center"></i> Products
+                    </a>
+                </nav>
+
+                <p class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-8 mb-2">Sales & Users
+                </p>
+                <nav class="space-y-1">
+                    <a href="{% url 'paidorders' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'paidorders' %}bg-slate-800 text-white{% endif %}">
+                        <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Orders
+                    </a>
+                    <a href=""
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md">
+                        <i class="fa-solid fa-credit-card w-5 text-center"></i> Payments
+                    </a>
+                    <a href="{% url 'allseller' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'allseller' %}bg-slate-800 text-white{% endif %}">
+                        <i class="fa-solid fa-store w-5 text-center"></i> Sellers
+                    </a>
+                    <a href="{% url 'allcustomer' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'allcustomer' %}bg-slate-800 text-white{% endif %}">
+                        <i class="fa-solid fa-users w-5 text-center"></i> Customers
+                    </a>
+                </nav>
             </div>
+
+            <!-- Logout -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+                <a href=""
+                    class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-xl transition-all">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50 relative">
+
+            <!-- Navbar -->
+            <header
+                class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 z-10 sticky top-0">
+                <!-- Search Box -->
+                <div class="w-96 hidden md:block">
+                    <div class="relative group">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-orange-500 transition-colors">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text"
+                            class="w-full py-2.5 pl-11 pr-4 bg-gray-50 border border-transparent rounded-full focus:bg-white focus:border-orange-500/20 focus:ring-4 focus:ring-orange-500/10 text-sm transition-all shadow-sm group-hover:bg-white group-hover:shadow"
+                            placeholder="Search for anything...">
+                    </div>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-6">
+                    <!-- Notifications -->
+                    <button
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all relative">
+                        <i class="fa-regular fa-bell text-xl"></i>
+                        <span
+                            class="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                    </button>
+
+                    <div class="h-8 w-px bg-gray-200"></div>
+
+                    <!-- Profile -->
+                    <div
+                        class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-gray-200">
+                        <div
+                            class="w-9 h-9 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold shadow-md shadow-orange-500/20">
+                            A
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-sm text-gray-800 leading-tight">Admin User</span>
+                            <span class="text-xs text-gray-500 leading-tight">Super Admin</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-1"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <main class="flex-1 overflow-y-auto p-8 relative">
+                <!-- Background decorative elements -->
+                <div
+                    class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-white to-transparent pointer-events-none">
+                </div>
+
+                <div class="relative z-10 max-w-7xl mx-auto">
+                    {% block content %}{% endblock %}
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-12 py-6 text-center text-sm text-gray-400 relative z-10">
+                    &copy; 2026 Thekua Ecommerce. All rights reserved.
+                </div>
+            </main>
         </div>
     </div>
 
-    <div class="px-[5%] flex flex-1 mt-8 gap-10 ">
-        <div class="w-3/12 h-screen">
-            <div class="flex flex-col divide-y text-xl">
-                <a href="{% url 'dashboardpage' %}" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-brands fa-buffer"></i>Dashboard</a>
-                <a href="{% url 'managecategory' %}" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-solid fa-house"></i>Managecategory</a>
-                <a href="{% url 'managesubcategory' %}" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-solid fa-house"></i>Managesubcategory</a>
-                <a href="{% url 'manageproduct' %}"class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-brands fa-artstation"></i>Manage Product</a>
-                <a href="{% url 'paidorders' %}" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-solid fa-cart-arrow-down"></i>Manage Order</a>
-                <a href="" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-solid fa-dollar-sign"></i>Manage Payments</a>
-                <a href="{% url 'allseller' %}" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-solid fa-circle-user"></i>Manage sellers</a>
-                <a href="{% url 'allcustomer' %}" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-solid fa-circle-user"></i>Manage customers</a>
-                <a href="" class="bg-green-300 text-black px-3 py-2 hover:bg-green-600 flex items-center gap-3"><i class="fa-solid fa-power-off"></i>Logout</a>
+    <!-- Global Loader -->
+    <div id="page-loader"
+        class="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none"
+        aria-hidden="true">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-slate-100 transform scale-95 transition-transform duration-300"
+            id="loader-content">
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin">
+                </div>
+                <div
+                    class="absolute inset-0 flex items-center justify-center font-bold text-orange-600 text-xl animate-pulse">
+                    T</div>
             </div>
-        </div>
-        <div class="w-9/12">
-            {% block content %}
-            {% endblock %}
+            <p class="text-slate-600 font-medium text-sm animate-pulse">Loading...</p>
         </div>
     </div>
 
+    <!-- Page Transition Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('page-loader');
+            const loaderContent = document.getElementById('loader-content');
+
+            function showLoader() {
+                loader.classList.remove('opacity-0', 'pointer-events-none');
+                loaderContent.classList.remove('scale-95');
+                loaderContent.classList.add('scale-100');
+            }
+
+            function hideLoader() {
+                loader.classList.add('opacity-0', 'pointer-events-none');
+                loaderContent.classList.add('scale-95');
+                loaderContent.classList.remove('scale-100');
+            }
+
+            // Handle Link Clicks
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (link &&
+                    link.href &&
+                    !link.href.startsWith('javascript:') &&
+                    !link.href.includes('#') &&
+                    link.target !== '_blank' &&
+                    link.hostname === window.location.hostname &&
+                    !e.ctrlKey && !e.metaKey
+                ) {
+                    showLoader();
+                }
+            });
+
+            // Handle Form Submissions
+            document.addEventListener('submit', () => {
+                showLoader();
+            });
+
+            // Handle Back/Forward Cache
+            window.addEventListener('pageshow', (event) => {
+                if (event.persisted) {
+                    hideLoader();
+                }
+            });
+
+            // Initial hide (in case it stuck)
+            hideLoader();
+        });
+    </script>
 </body>
+
 </html>
-
-

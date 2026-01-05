@@ -60,23 +60,21 @@ def deleteproduct(request,id):
     deletedproduct.delete()
     return redirect(manageproduct)
 
-# def createseller(request):
-#     seller=User.objects.filter(role)
-#     return render(request,"admin/createseller.html")
+
 
 def allcustomer(request):
     customers=Role.objects.filter(role=Role.CUSTOMER).select_related("user")
     
     for customer in customers:
-        # Wishlist count
         customer.wishlist_count = WishlistItem.objects.filter(
             wishlist__user=customer.user
         ).count()
 
-        # Order count (SAFE & CORRECT)
+
         customer.order_count = Order.objects.filter(
             user=customer.user
         ).count()
+
 
     return render(request,"admin/viewcustomer.html",{"customers":customers})
 
@@ -90,8 +88,7 @@ def customerwishlist(request,user_id):
     wishlistitem=WishlistItem.objects.filter(wishlist__user=user).select_related("product_variant", "product_variant__product")
     return render(request,"admin/customerwishlist.html",{"user":user,"wishlistitems":wishlistitem})
 
-# def sellercategories(request):
-#     return render(request,"admin/sellercategories.html")
+
 
 def customerorder(request,user_id):
     user=get_object_or_404(User,id=user_id)

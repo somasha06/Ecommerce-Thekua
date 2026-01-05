@@ -27,11 +27,11 @@ class SignupRequestAPIView(APIView):
     permission_classes = [AllowAny]
     
     def post(self,request):
-        print("hit")
+
         serializer=SignupRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True) #runs validate()
-        pending_user=serializer.save() #calls create()
-        #creates PendingUser
+        serializer.is_valid(raise_exception=True)
+        pending_user=serializer.save()
+
         return Response({"message": "OTP sent successfully","session_id": str(pending_user.session_id)},status=status.HTTP_200_OK)
     
 
@@ -41,7 +41,7 @@ class OTPVerifyAPIView(APIView):
 
     def post(self,request):
         serializer=OTPVerifySerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):# if is_valid passed than every data get stored in serializer.validated_data and when we call serializer.save() drf passes that data into create(self, validated_data)
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
 
             return Response({"message": "User created successfully"},status=status.HTTP_201_CREATED)
@@ -122,7 +122,7 @@ class ProductViewSet(ModelViewSet):
         if self.action in ["list", "retrieve"]:
             queryset = queryset.filter(is_active=True)
 
-            search = self.request.query_params.get("search") # it's just if the url has key search than store it in search
+            search = self.request.query_params.get("search")
             sort = self.request.query_params.get("sort")
             min_price = self.request.query_params.get("min_price")
             max_price = self.request.query_params.get("max_price")
@@ -158,7 +158,7 @@ class ProductViewSet(ModelViewSet):
                     productvariants__price__lte=Decimal(max_price)
                 )
 
-            # ↕ Sorting
+
             if sort == "price_low":
                 queryset = queryset.order_by("effective_price")
             elif sort == "price_high":
@@ -168,7 +168,7 @@ class ProductViewSet(ModelViewSet):
 
             if user.is_authenticated:
                 wishlist = user.wishlist
-                queryset = queryset.annotate( #annotate=It only adds extra information to the query result.
+                queryset = queryset.annotate(
                     is_wishlisted=Exists(
                         WishlistItem.objects.filter(
                             wishlist=wishlist,
@@ -202,24 +202,17 @@ class WishlistViewSet(ReadOnlyModelViewSet):
     def get_queryset(self):
         return Wishlist.objects.filter(user=self.request.user)
     
-    # def perform_create(self, serializer):
-    #     wishlist = self.request.user.wishlist
-    #     serializer.save(user=self.request.user)
 
-    # def my_wishlist(self,request):
-    #     wishlist,_=Wishlist.objects.get_or_create(user=request.user)
-    #     serializer=self.get_serializer(wishlist)
-    #     return Response(serializer.data)
     
 class WishlistItemViewSet(ModelViewSet):
     serializer_class=WishlistitemSerializer
     permission_classes=[IsCustomer]
 
     def get_queryset(self):
-        return WishlistItem.objects.filter(wishlist__user=self.request.user).select_related("product_variant","product_variant__product")#To filter through relations → use __
+        return WishlistItem.objects.filter(wishlist__user=self.request.user).select_related("product_variant","product_variant__product")
     
     def perform_create(self, serializer):
-        # wishlist,_=Wishlist.objects.get_or_create(user=self.request.user)
+
         serializer.save(wishlist=self.request.user.wishlist)
 
     @action(detail=False, methods=["post"])
@@ -238,11 +231,11 @@ class WishlistItemViewSet(ModelViewSet):
         return Response(serializer.data,status=201 if created else 200)
     
 
-    @action(detail=False, methods=["post"]) #Custom endpoints require @action
+    @action(detail=False, methods=["post"])
     def remove(self,request):
         variant_id=request.data.get("product_variant")
 
-        # WishlistItem.objects.filter(Wishlist_user=request.user,product_variant_id=variant_id).delete()
+
 
        
         if not variant_id:
@@ -282,7 +275,7 @@ class CartItemViewSet(ModelViewSet):
         return CartItem.objects.filter(cart__user=self.request.user).select_related("product_variant","product_variant__product")
     
     def perform_create(self, serializer):
-        # cart, _ = Cart.objects.get_or_create(user=self.request.user)
+
         serializer.save(cart=self.request.user)
 
     @action(detail=False,methods=["post"])
@@ -340,8 +333,7 @@ class OrderViewSet(ReadOnlyModelViewSet):
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
     
-    # def perform_create(self,serializer):
-    #     serializer.save(user=self.request.user)
+
 
 class OrderItemViewSet(ReadOnlyModelViewSet):
     serializer_class=OrderItemSerializer
@@ -364,12 +356,9 @@ class CheckoutView(APIView):
 
         total_price=0
 
-        #cart.items → all items
-        #cart_item → one item from that list
-
-        for cart_item in cart.items.select_related("product_variant"):    #“cart.items=All CartItem objects that belong to this cart” select_related=When fetching CartItem, also fetch the related ProductVariant in the SAME query
+        for cart_item in cart.items.select_related("product_variant"):
             order_item=OrderItem.objects.create(order=order,product_variant=cart_item.product_variant,quantity=cart_item.quantity,price=cart_item.product_variant.price)
-                                #left order=field name from orderitem | right order=variable above defined order=order means Set the order_id of this OrderItem to the ID of the Order we just created
+
             total_price +=(
                 order_item.quantity*order_item.price
             )
@@ -377,7 +366,7 @@ class CheckoutView(APIView):
         order.total_price=total_price
         order.save()
 
-        # cart.items.all().delete()
+
 
         return Response(
             {
@@ -388,17 +377,7 @@ class CheckoutView(APIView):
             status=status.HTTP_201_CREATED
         )
     
-#A user first has a Cart, and inside the cart there are CartItems that store all the selected products and quantities.
 
-# When the user clicks Checkout, the backend creates an Order, and all the cart items are copied into OrderItems inside that order.
-
-#After the order and order items are created, the user proceeds to payment.
-
-#Once the payment is successful, the order is confirmed, and the user can see it in My Orders.
-
-
-
-    
 class CreatePaymentView(APIView):
     permission_classes=[IsCustomer]
 
@@ -409,7 +388,7 @@ class CreatePaymentView(APIView):
 
         razorpay_order=client.order.create(
             {
-               "amount": int(order.total_price * 100),  # paise
+               "amount": int(order.total_price * 100),
                 "currency": "INR",
                 "payment_capture": 1 
             }

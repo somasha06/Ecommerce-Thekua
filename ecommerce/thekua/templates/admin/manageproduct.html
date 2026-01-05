@@ -1,49 +1,120 @@
 {% extends "admin/adminbase.html" %}
-
-
 {% block content %}
 
-<div class="flex flex-1 justify-between items-center ">
-    <h2 class="text-2xl font-semibold">Manage Products</h2>
-    <a href="{% url 'insertproduct' %}" class="bg-green-600 text-white px-3 py-2 rounded">Insert Product</a>
+<div class="space-y-6 animate-fade-in-up">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Products Catalog</h2>
+            <p class="text-slate-500 text-sm mt-1">Manage your store's inventory and variations.</p>
+        </div>
+        <a href="{% url 'insertproduct' %}"
+            class="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 group">
+            <i class="fa-solid fa-plus transition-transform group-hover:rotate-90"></i> Add Product
+        </a>
+    </div>
+
+    <!-- Products Table Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">All Products</h3>
+            <div class="relative">
+                <i
+                    class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" placeholder="Search products..."
+                    class="pl-8 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all w-64">
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-16">ID</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Product Info
+                        </th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Price</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                            Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for product in products %}
+                    <tr class="hover:bg-slate-50/80 transition-colors group">
+                        <td class="py-4 px-6 text-sm text-slate-500 font-mono">#{{ forloop.counter }}</td>
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0">
+                                    {% if product.image %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                        class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                        <i class="fa-solid fa-image"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <span class="text-sm font-semibold text-slate-800">{{ product.name }}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-sm text-slate-600">
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                {{ product.subcategory }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-sm font-medium text-slate-800">
+                            Starting from ₹{{ product.starting_from }}
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <div
+                                class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'viewproduct' product.id %}"
+                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 hover:scale-105 transition-all"
+                                    title="View">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </a>
+                                <a href=""
+                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all"
+                                    title="Edit">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </a>
+                                <a href="{% url 'deleteproduct' product.id %}"
+                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 hover:scale-105 transition-all"
+                                    title="Delete" onclick="return confirm('Are you sure?');">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-12 text-center text-slate-500">No products found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-    <table class="w-full mt-5">
-        <thead>
-            <tr>
-                <td class="p-3 border">ID</td>
-                <td class="p-3 border">Name</td>
-                <td class="p-3 border">subcategory</td>
-                {% comment %} <td class="p-3 border"></td> {% endcomment %}
-                <td class="p-3 border">Image</td>
-                <td class="p-3 border">Price</td>
-                <td class="p-3 border">Action</td>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-            <tr>
-                <td class="p-3 border">{{forloop.counter}}</td>
-                <td class="p-3 border">{{product.name}}</td>
-                <td class="p-3 border">{{product.subcategory}}</td>
-                {% comment %} <td class="p-3 border">{{product.}}</td> {% endcomment %}
-                <td class="p-3 border">
-                    <img src="{{product.image.url}}" width="100px" alt="">
-                </td>
-                <td class="p-3 border">{{product.starting_from}} </td>
-                <td class="p-3 border">
-                    <div class="flex gap-1">
-                        <a href="{% url 'deleteproduct' product.id %}" class="bg-red-600 hover:bg-red-700 text-white rounded text-sm px-3 py-2">Delete</a>
-                        <a href="" class="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm px-3 py-2">Edit</a>
-                        <a href="{% url 'viewproduct' product.id %}" class="bg-green-600 hover:bg-green-700 text-white rounded text-sm px-3 py-2">View</a>
-                    </div>
-                </td>
-            </tr>
 
-            {% endfor %}
-            <h2></h2>
-            
-        </tbody>
-    </table>
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+</style>
 
 {% endblock %}

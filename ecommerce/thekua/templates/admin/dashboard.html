@@ -1,34 +1,173 @@
 {% extends "admin/adminbase.html" %}
 {% block content %}
 
-<div class="grid grid-cols-3 gap-10 px-[10%]">
-    <div class="bg-green-500 text-white rounded-[50%] p-10 text-center">
-        <h2 class="text-3xl">40+</h2>
-        <h2 class="text-xl">Total orders</h2>
+<div class="space-y-8 animate-fade-in-up">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Dashboard Overview</h1>
+            <p class="text-slate-500 mt-1">Welcome back, Admin. Here's what's happening today.</p>
+        </div>
+        <div class="flex gap-3">
+            <button
+                class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+                <i class="fa-solid fa-download mr-2"></i> Export Report
+            </button>
+        </div>
     </div>
-    <div class="bg-pink-500 text-white rounded-[50%] p-10 text-center">
-        <h2 class="text-3xl">40+</h2>
-        <h2 class="text-xl">Total Products</h2>
-    </div>
-    <div class="bg-yellow-500 text-white rounded-[50%] p-10 text-center">
-        <h2 class="text-3xl">40+</h2>
-        <h2 class="text-xl">Total users</h2>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Stat Card 1 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 hover:border-orange-200 hover:shadow-lg transition-all group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Orders</p>
+                    <h3 class="text-3xl font-bold text-slate-800 mt-2">40+</h3>
+                </div>
+                <div
+                    class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all text-orange-500">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-sm pt-4 border-t border-slate-50">
+                <span
+                    class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                    <i class="fa-solid fa-arrow-trend-up"></i> 12%
+                </span>
+                <span class="text-slate-400 text-xs">vs last week</span>
+            </div>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Products</p>
+                    <h3 class="text-3xl font-bold text-slate-800 mt-2">40+</h3>
+                </div>
+                <div
+                    class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all text-blue-500">
+                    <i class="fa-solid fa-box-open text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-sm pt-4 border-t border-slate-50">
+                <span
+                    class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                    <i class="fa-solid fa-plus"></i> 5 New
+                </span>
+                <span class="text-slate-400 text-xs">Added this month</span>
+            </div>
+        </div>
+
+        <!-- Stat Card 3 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 hover:border-purple-200 hover:shadow-lg transition-all group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Users</p>
+                    <h3 class="text-3xl font-bold text-slate-800 mt-2">40+</h3>
+                </div>
+                <div
+                    class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-all text-purple-500">
+                    <i class="fa-solid fa-users text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-sm pt-4 border-t border-slate-50">
+                <span
+                    class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                    <i class="fa-solid fa-arrow-trend-up"></i> 8%
+                </span>
+                <span class="text-slate-400 text-xs">Growth rate</span>
+            </div>
+        </div>
+
+        <!-- Stat Card 4 (Row 2) -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 hover:border-emerald-200 hover:shadow-lg transition-all group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Revenue</p>
+                    <h3 class="text-3xl font-bold text-slate-800 mt-2">₹40k+</h3>
+                </div>
+                <div
+                    class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all text-emerald-500">
+                    <i class="fa-solid fa-indian-rupee-sign text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-sm pt-4 border-t border-slate-50">
+                <span
+                    class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                    <i class="fa-solid fa-arrow-trend-up"></i> 4%
+                </span>
+                <span class="text-slate-400 text-xs">vs last month</span>
+            </div>
+        </div>
+
+        <!-- Stat Card 5 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 hover:border-rose-200 hover:shadow-lg transition-all group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Items Sold</p>
+                    <h3 class="text-3xl font-bold text-slate-800 mt-2">40+</h3>
+                </div>
+                <div
+                    class="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-all text-rose-500">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-sm pt-4 border-t border-slate-50">
+                <span
+                    class="text-rose-600 font-bold flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded-full text-xs">
+                    <i class="fa-solid fa-arrow-trend-down"></i> 2%
+                </span>
+                <span class="text-slate-400 text-xs">vs last week</span>
+            </div>
+        </div>
+
+        <!-- Stat Card 6 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 hover:border-indigo-200 hover:shadow-lg transition-all group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Net Profit</p>
+                    <h3 class="text-3xl font-bold text-slate-800 mt-2">40+</h3>
+                </div>
+                <div
+                    class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all text-indigo-500">
+                    <i class="fa-solid fa-coins text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-sm pt-4 border-t border-slate-50">
+                <span
+                    class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                    <i class="fa-solid fa-check"></i> On track
+                </span>
+                <span class="text-slate-400 text-xs">to meet goals</span>
+            </div>
+        </div>
     </div>
 </div>
-<br>
-<div class="grid grid-cols-3 gap-10 px-[10%]">
-    <div class="bg-blue-500 text-white rounded-[50%] p-10 text-center">
-        <h2 class="text-3xl">40+</h2>
-        <h2 class="text-xl">Total paymentss</h2>
-    </div>
-    <div class="bg-red-500 text-white rounded-[50%] p-10 text-center">
-        <h2 class="text-3xl">40+</h2>
-        <h2 class="text-xl">Total sold items</h2>
-    </div>
-    <div class="bg-gray-500 text-white rounded-[50%] p-10 text-center">
-        <h2 class="text-3xl">40+</h2>
-        <h2 class="text-xl">Total profits</h2>
-    </div>
-</div>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+</style>
 
 {% endblock %}

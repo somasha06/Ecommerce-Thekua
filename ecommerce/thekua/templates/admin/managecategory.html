@@ -1,48 +1,161 @@
 {% extends "admin/adminbase.html" %}
-
 {% load tailwind_filters %}
 
 {% block content %}
-
-<div class="flex flex-1 gap-10">
-    <div class="w-9/12">
-        <h2 class="text-xl font-semibold">Manage Category</h2>
-
-        <table class="table border w-full mt-5">
-                <thead>
-                    <tr>
-                        <th class="p-3 border">ID</th>
-                        <th class="p-3 border">Name</th>
-                        <th class="p-3 border">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for category in categories %}<!-- this loop takes each single item (each Category object) from that list and temporarily names it category for this one iteration.-->
-                        <tr>
-                            <td class="p-3 border">{{ forloop.counter }}</td>  <!-- category.id means “the ID (primary key) of this single category”.-->
-                            <td class="p-3 border">{{ category.name }}</td>
-                            <td class="p-3 border flex gap-3">
-                                <a href="" class=" text-white border border-black bg-blue-700 p-[2%] rounded-[50%] text-lg"><i class="fa-solid fa-eye"></i></a>
-                                <a href="{% url 'deletecategory' category.id %}" class=" text-white border border-black bg-red-500 p-[2%] rounded-[50%] text-lg"><i class="fa-solid fa-trash"></i></a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="space-y-6 animate-fade-in-up">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Accessory Categories</h2>
+            <p class="text-slate-500 text-sm mt-1">Organize your product catalog efficiently.</p>
+        </div>
     </div>
-    <div class="w-3/12">
-        <div class="bg-orange-200 p-[5%] rounded">
-            <h2 class="text-xl font-semibold">Insert Category</h2>
-            
-            <form action="" method="post">
-                {% csrf_token %}
-                {{form|crispy}}
-                <input type="submit" value="insert category" class="bg-green-300 text-black px-3 py-2 rounded w-full">
-            </form>
 
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <!-- List Section -->
+        <div class="lg:col-span-3 order-2 lg:order-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-semibold text-slate-700">All Categories</h3>
+                    <div class="relative">
+                        <i
+                            class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" placeholder="Search..."
+                            class="pl-8 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all w-64">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-20">ID
+                                </th>
+                                <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Category
+                                    Name</th>
+                                <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Status
+                                </th>
+                                <th
+                                    class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right w-40">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for category in categories %}
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
+                                <td class="py-4 px-6 text-sm text-slate-500 font-mono">#{{ forloop.counter }}</td>
+                                <td class="py-4 px-6 text-sm font-medium text-slate-800">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">
+                                            {{ category.name|slice:":1" }}
+                                        </div>
+                                        {{ category.name }}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <label class="inline-flex items-center cursor-pointer group/toggle">
+                                        <input type="checkbox" value="" class="sr-only peer" {% if category.is_active %}checked{% endif %}>
+                                        <div
+                                            class="relative w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500 group-hover/toggle:ring-2 group-hover/toggle:ring-orange-500/10">
+                                        </div>
+                                        <span
+                                            class="ml-3 text-sm font-medium text-slate-600 peer-checked:text-slate-800 hidden md:block">
+                                            {% if category.is_active %}Active{% else %}Inactive{% endif %}
+                                        </span>
+                                    </label>
+                                </td>
+                                <td class="py-4 px-6 text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all"
+                                            title="View Details">
+                                            <i class="fa-solid fa-eye text-xs"></i>
+                                        </button>
+                                        <a href="{% url 'deletecategory' category.id %}"
+                                            class="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 hover:scale-105 transition-all"
+                                            title="Delete Category"
+                                            onclick="return confirm('Are you sure you want to delete this category?');">
+                                            <i class="fa-solid fa-trash text-xs"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center text-slate-400">
+                                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-200"></i>
+                                        <p>No categories found.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination (Placeholder) -->
+                <div class="p-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                    <span>Showing {{ categories|length }} entries</span>
+                    <div class="flex gap-1">
+                        <button class="px-2 py-1 border rounded hover:bg-slate-50 disabled:opacity-50"
+                            disabled>&lt;</button>
+                        <button class="px-2 py-1 border rounded hover:bg-slate-50 disabled:opacity-50"
+                            disabled>&gt;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Form -->
+        <div class="lg:col-span-2 order-1 lg:order-2">
+            <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 p-6 sticky top-24">
+                <div class="mb-6 flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/20">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Add New</h3>
+                        <p class="text-xs text-slate-500">Create a category</p>
+                    </div>
+                </div>
+
+                <form action="" method="post" class="space-y-5">
+                    {% csrf_token %}
+                    <div>
+                        {{ form|crispy }}
+                        <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-info text-blue-400"></i> The name must be unique.
+                        </p>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center items-center py-3 px-4 rounded-xl shadow-lg shadow-slate-900/20 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all">
+                        Create Category
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+</style>
 {% endblock %}

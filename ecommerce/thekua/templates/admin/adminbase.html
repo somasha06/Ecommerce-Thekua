@@ -78,6 +78,10 @@
                         class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'manageproduct' %}bg-slate-800 text-white{% endif %}">
                         <i class="fa-solid fa-box-open w-5 text-center"></i> Products
                     </a>
+                    <a href="{% url 'manageproductvariant' %}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'manageproduct' %}bg-slate-800 text-white{% endif %}">
+                        <i class="fa-solid fa-box-open w-5 text-center"></i> ProductVariant
+                    </a>
                 </nav>
 
                 <p class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-8 mb-2">Sales & Users
@@ -91,9 +95,9 @@
                         class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md">
                         <i class="fa-solid fa-credit-card w-5 text-center"></i> Payments
                     </a>
-                    <a href="{% url 'allseller' %}"
+                    <a href="{% url 'storeprofile' %}"
                         class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'allseller' %}bg-slate-800 text-white{% endif %}">
-                        <i class="fa-solid fa-store w-5 text-center"></i> Sellers
+                        <i class="fa-solid fa-store w-5 text-center"></i> Store Profile
                     </a>
                     <a href="{% url 'allcustomer' %}"
                         class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white hover:shadow-md {% if request.resolver_match.url_name == 'allcustomer' %}bg-slate-800 text-white{% endif %}">

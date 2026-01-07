@@ -1,0 +1,22 @@
+{% extends "admin/adminbase.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow">
+    {% comment %} <h2 class="text-2xl font-bold mb-6">Add Product Variant</h2> {% endcomment %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="space-y-4">
+            {{ form|crispy}}
+        </div>
+
+        <button type="submit"
+            class="mt-6 bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800">
+            Save Variant
+        </button>
+    </form>
+</div>
+
+{% endblock %}

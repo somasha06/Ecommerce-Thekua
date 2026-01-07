@@ -14,4 +14,16 @@ class Subcategoryform(ModelForm):
 class Productform(ModelForm):
     class Meta:
         model=Product
+        exclude = ["seller", "slug"]
+
+class Productvariantform(ModelForm):
+    class Meta:
+        model=ProductVariant
         fields="__all__"
+
+class StoreProfileForm(ModelForm):
+    class Meta:
+        model = StoreProfile
+        fields = "__all__"
+
+

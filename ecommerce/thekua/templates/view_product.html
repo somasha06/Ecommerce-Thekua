@@ -34,12 +34,17 @@
                 </div>
             </div>
 
+            
+
             <!-- Product Details -->
             <div class="flex flex-col justify-center">
                 <div class="mb-2 flex items-center gap-2">
-                    <span
-                        class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-wider">{{ product.seller|default:"Thekua Brand" }}</span>
+                    <div class="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-semibold">
+                        <i class="fa-solid fa-heart"></i>
+                        Made with love by {{ profile.owner_name }}
+                    </div>  
                 </div>
+                
 
                 <h1 class="text-3xl md:text-5xl font-bold text-slate-900 font-heading leading-tight mb-4">
                     {{product.name}}</h1>
@@ -56,13 +61,15 @@
 
                 <div class="mb-8">
                     <div class="flex items-baseline gap-4">
-                        {% if product.discount_price %}
-                        <span class="text-4xl font-bold text-gray-900">₹{{product.discount_price}}</span>
-                        <span class="text-xl text-slate-400 line-through">₹{{product.starting_from}}</span>
-                        <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">-20% OFF</span>
-                        {% else %}
-                        <span class="text-4xl font-bold text-gray-900">₹{{product.starting_from}}</span>
-                        {% endif %}
+                        <span class="text-4xl font-bold text-gray-900">
+                            ₹<span id="price">{{ default_variant.price }}</span>
+                        </span>
+
+                        {% comment %} {% if default_variant.discount_price %} {% endcomment %}
+                        <span class="text-xl text-slate-400 line-through">
+                            ₹<span id="discount">{{ default_variant.discount_price }}</span>
+                        </span>
+                        {% comment %} {% endif %} {% endcomment %}
                     </div>
                     <p class="text-sm text-slate-500 mt-2">Inclusive of all taxes</p>
                 </div>
@@ -72,14 +79,46 @@
                     <p>{{product.description}}</p>
                 </div>
 
+                <p class="text-xs text-gray-500 mt-4">
+                    Manufactured and packed by {{ profile.store_name }},
+                    {{ profile.address }}.
+                </p>
+
+                <div class="mb-8">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">
+                        Select Weight
+                    </h3>
+
+                    <div class="flex gap-3 flex-wrap">
+                        {% for variant in productvariants %}
+                        <button
+                            type="button"
+                            class="variant-btn border border-slate-300 px-4 py-2 rounded-xl text-sm font-semibold hover:border-slate-900 transition"
+                            data-id="{{ variant.id }}"
+                            data-price="{{ variant.price }}"
+                            data-discount="{{ variant.discount_price|default:'' }}"
+                            {% if forloop.first %} data-active="true" {% endif %}
+                        >
+                            {{ variant.weight }}
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        Handmade by <span class="font-semibold">{{ profile.owner_name }}</span>
+                    </p>
+                </div>
+
+
+
                 <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-slate-100">
                     <div class="flex flex-1 gap-2">
                         <button
                             class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all">
                             <i class="fa-solid fa-heart"></i>
                         </button>
-                        <button
-                            class="flex-1 bg-slate-900 text-white font-bold rounded-xl px-8 py-3 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-95 transition-all">
+                        <button onclick="addToCart()"
+                            class="flex-1 bg-slate-900 text-white font-bold rounded-xl px-8 py-3 hover:bg-slate-800 hover:shadow-lg active:scale-95 transition-all">
                             Add to Cart
                         </button>
                     </div>
@@ -102,5 +141,51 @@
         </div>
     </div>
 </section>
+
+
+
+<script>
+let selectedVariant = "{{ default_variant.id }}";
+
+const buttons = document.querySelectorAll(".variant-btn");
+const priceEl = document.getElementById("price");
+const discountEl = document.getElementById("discount");
+
+buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+
+        buttons.forEach(b => {
+            b.classList.remove("border-slate-900", "bg-slate-900", "text-white");
+        });
+
+        btn.classList.add("border-slate-900", "bg-slate-900", "text-white");
+
+        priceEl.innerText = btn.dataset.price;
+
+        if (discountEl) {
+            discountEl.innerText = btn.dataset.discount || "";
+        }
+
+        selectedVariant = btn.dataset.id;
+    });
+});
+
+function addToCart() {
+    fetch("/api/cart/add/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            product_variant: selectedVariant,
+            quantity: 1
+        })
+    })
+    .then(res => res.json())
+    .then(() => alert("Added to cart"))
+}
+</script>
+
 
 {% endblock %}

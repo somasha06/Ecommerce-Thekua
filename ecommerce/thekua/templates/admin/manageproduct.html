@@ -34,6 +34,7 @@
                         </th>
                         <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
                         <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Price</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Prepared by/seller</th>
                         <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
                             Actions</th>
                     </tr>
@@ -67,6 +68,9 @@
                         <td class="py-4 px-6 text-sm font-medium text-slate-800">
                             Starting from ₹{{ product.starting_from }}
                         </td>
+                        <td class="text-sm text-slate-600">
+                            made with love by Asha
+                        </td>
                         <td class="py-4 px-6 text-right">
                             <div
                                 class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -75,7 +79,7 @@
                                     title="View">
                                     <i class="fa-solid fa-eye text-xs"></i>
                                 </a>
-                                <a href=""
+                                <a href="{% url 'editproduct' product.id %}"
                                     class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all"
                                     title="Edit">
                                     <i class="fa-solid fa-pen text-xs"></i>

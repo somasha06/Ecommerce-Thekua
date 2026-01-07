@@ -58,14 +58,24 @@ urlpatterns = [
     path("admin/subcategory",managesubcategory,name="managesubcategory"),
     path("admin/subcategory/<int:id>/",deletesubcategory,name="deletesubcategory"),
     path("admin/product",insertproduct,name="insertproduct"),
+    path("admin/productvariant",insertproductvariant,name="insertproductvariant"),
     path("admin/product/<int:id>/",deleteproduct,name="deleteproduct"),
+    path("admin/productvariant/<int:id>/",deleteproductvariant,name="deleteproductvariant"),
     path("admin/manageproduct",manageproduct,name="manageproduct"),
+    path("admin/manageproductvariant",manageproductvariant,name="manageproductvariant"),
     path("admin/seller",allseller,name="allseller"),
     path("admin/customer", allcustomer, name="allcustomer"),
     path("admin/customer/<int:user_id>/wishlist/",customerwishlist, name="customerwishlist"),
     path("admin/customer/<int:user_id>/orders/",customerorder, name="customerorder"),
     path("admin/order/<int:order_id>/items/",orderitems,name="orderitems"),
     path("admin/orders/paid/",paidorders, name="paidorders"),
+    path("admin/storeprofile",storeprofile,name="storeprofile"),
+    path("about/",about, name="about"),
+    path("admin/category/<int:id>/edit/", editcategory, name="editcategory"),
+    path("admin/subcategory/<int:id>/edit/", editsubcategory, name="editsubcategory"),
+    path("admin/product/<int:id>/edit/", editproduct, name="editproduct"),
+    path("admin/productvariant/<int:id>/edit/", editproductvariant, name="editproductvariant"),
+
 
 ]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

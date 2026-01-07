@@ -81,7 +81,26 @@ class Command(BaseCommand):
                         "price": "450.00",
                         "weight": "500g",
                         "image": "laddoo.png"
-                    }
+                    },
+                      {
+                        "name": "Nimki",
+                        "sub": "nimki Varieties",
+                        "desc": "made with pure cow ghee and premium refined flour.",
+                        "price": "550.00",
+                        "weight": "500g",
+                        "image": "nimki.png"
+                    },
+
+                      {
+                        "name": "sugar free thekua",
+                        "sub": "sugar free",
+                        "desc": "made with pure cow ghee and premium flour.",
+                        "price": "550.00",
+                        "weight": "500g",
+                        "image": "sugar free.jpg"
+                    },
+
+                    
 
                 ]
             },

@@ -86,7 +86,7 @@
             <nav class="hidden md:flex items-center gap-8 font-medium text-slate-600">
                 <a href="/" class="hover:text-orange-600 transition-colors nav-link">Home</a>
                 <a href="/" class="hover:text-orange-600 transition-colors nav-link">Shop</a>
-                <a href="/" class="hover:text-orange-600 transition-colors nav-link">About Us</a>
+                <a href="{% url 'about' %}" class="hover:text-orange-600 transition-colors nav-link">About Us</a>
                 <a href="/" class="hover:text-orange-600 transition-colors nav-link">Contact</a>
             </nav>
 
@@ -195,6 +195,20 @@
                     </form>
                 </div>
             </div>
+
+            {% if profile.gst_number or profile.fssai_number %}
+            <div class="text-xs text-gray-400 mt-4">
+                {% if profile.gst_number %}
+                    GSTIN: {{ profile.gst_number }}
+                {% endif %}
+                {% if profile.fssai_number %}
+                    <span class="mx-2">|</span>
+                    FSSAI: {{ profile.fssai_number }}
+                {% endif %}
+            </div>
+            {% endif %}
+
+
             <div
                 class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
                 <p>&copy; 2026 Thekua Ecommerce. All rights reserved.</p>

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+
+<section class="max-w-4xl mx-auto px-6 py-16">
+
+    {% comment %} <div class="text-3xl font-bold mb-4 text-gray-600">
+        <a href="{% url 'storeprofile' %}"></a>
+    </div> {% endcomment %}
+
+    {% if profile.profile %}
+    <div class="flex justify-center mb-6">
+        <img
+            src="{{ profile.profile.url }}"
+            alt="{{ profile.owner_name }}"
+            class="h-40 w-40 rounded-full object-cover shadow-md"
+        >
+    </div>
+{% endif %}
+
+    <h1 class="text-3xl font-bold mb-4">
+        {{ profile.store_name }}
+    </h1>
+
+    <p class="text-gray-700 leading-relaxed mb-6">
+        {{ profile.description }}
+    </p>
+
+    <p class="text-gray-600 font-medium">
+        Owner: {{ profile.owner_name }}
+    </p>
+
+    <p class="text-gray-600 mt-2">
+        Contact: {{ profile.phone }} | {{ profile.email }}
+    </p>
+
+    <p class="text-gray-600 mt-2">
+        Address: {{ profile.address }}
+    </p>
+
+    <div class="mt-6 text-sm text-gray-600 space-y-1">
+    <p><strong>Owner:</strong> {{ profile.owner_name }}</p>
+
+    {% if profile.gst_number %}
+        <p><strong>GSTIN:</strong> {{ profile.gst_number }}</p>
+    {% endif %}
+
+    {% if profile.fssai_number %}
+        <p><strong>FSSAI License:</strong> {{ profile.fssai_number }}</p>
+    {% endif %}
+    </div>
+
+</section>
+
+{% endblock %}

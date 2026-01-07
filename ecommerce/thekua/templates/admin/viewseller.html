@@ -1,57 +1,147 @@
 {% extends 'admin/adminbase.html' %}
 {% block content %}
 
-<div class="mt-5 w-9/12 p-5">
-    <div class="flex justify-between">
-        <h2 class="text-xl font-bold mb-4 text-gray-700 mt-10">Sellers</h2>
-        <div class="text-center">
-            <a href="" class="bg-slate-600 text-xl text-white p-3 font-semibold rounded shadow hover:bg-slate-800">+ Create New Seller</a>
+<div class="space-y-6 animate-fade-in-up">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Seller Database</h2>
+            <p class="text-slate-500 text-sm mt-1">View and manage registered sellers.</p>
+        </div>
+
+        <a href=""
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition">
+            + Create New Seller
+        </a>
+    </div>
+
+    <!-- Table Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center w-16">
+                            ID
+                        </th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            Seller
+                        </th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            Email
+                        </th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                            Mobile
+                        </th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                            Status
+                        </th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100">
+                    {% for seller in sellers %}
+                    <tr class="hover:bg-slate-50/80 transition-colors group">
+                        <!-- Counter -->
+                        <td class="py-4 px-6 text-sm font-mono text-slate-600 text-center">
+                            {{ forloop.counter }}
+                        </td>
+
+                        <!-- Seller -->
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                                    {{ seller.user.username|slice:":1"|upper }}
+                                </div>
+                                <span class="text-sm font-medium text-slate-800">
+                                    {{ seller.user.username }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Email -->
+                        <td class="py-4 px-6 text-sm text-slate-600">
+                            {{ seller.user.email }}
+                        </td>
+
+                        <!-- Mobile -->
+                        <td class="py-4 px-6 text-sm text-slate-600 text-center">
+                            {{ seller.user.mobile }}
+                        </td>
+
+                        <!-- Status -->
+                        <td class="py-4 px-6 text-center">
+                            {% if seller.user.is_active %}
+                            <span
+                                class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold">
+                                Active
+                            </span>
+                            {% else %}
+                            <span
+                                class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-semibold">
+                                Inactive
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="py-4 px-6 text-right">
+                            <div class="inline-flex items-center gap-2">
+                                <a href=""
+                                   class="px-3 py-1.5 text-xs font-bold uppercase text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition">
+                                    View
+                                </a>
+                                <a href=""
+                                   class="px-3 py-1.5 text-xs font-bold uppercase text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+                                    Edit
+                                </a>
+
+                                {% if seller.user.is_active %}
+                                <a href=""
+                                   class="px-3 py-1.5 text-xs font-bold uppercase text-rose-600 bg-rose-50 rounded-lg hover:bg-rose-100 transition">
+                                    Deactivate
+                                </a>
+                                {% else %}
+                                <a href=""
+                                   class="px-3 py-1.5 text-xs font-bold uppercase text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition">
+                                    Activate
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-slate-500">
+                            No sellers found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-        <table class="min-w-full bg-white shadow rounded ">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-2 border">ID</th>
-                    <th class="px-4 py-2 border">username</th>
-                    <th class="px-4 py-2 border">email</th>
-                    <th class="px-4 py-2 border">Mobile</th>
-                    {% comment %} <th class="px-4 py-2 border">DOJ</th> {% endcomment %}
-                    
-                    <th class="px-4 py-2 border">Action</th>
-                </tr>
-            </thead>
+</div>
 
-            <tbody>
-                {% for seller in sellers %}
-                <tr class="border-b">
-                    <td class="px-4 py-2 text-center">{{ forloop.counter }}</td>
-                    <td class="px-4 py-2 text-center">{{ seller.user.username }}</td>
-                    <td class="px-4 py-2 text-center">{{ seller.user.email }}</td>
-                    <td class="px-4 py-2 text-center">{{ seller.user.mobile}}</td>
-                    {% comment %} <td class="px-4 py-2 text-center">{{ seller.date_joined }}</td> {% endcomment %}
-                    
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-                    <td class="px-4 py-2 text-center">
-                        <a href="">View</a>
-                        <a href="">Edit</a>
-                        {% if user != is_active %}
-                        {{user.active}}
-                        <a href="">Active</a>
-                        {% else %}
-                        <a href="">Inactive</a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-               
-                    <td colspan="2" class="px-4 py-4  text-gray-500">
-                        No staff members found.
-                    </td>
-                </tr> 
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+</style>
 
 {% endblock %}

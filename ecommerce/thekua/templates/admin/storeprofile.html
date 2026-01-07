@@ -1,0 +1,18 @@
+{% extends "admin/adminbase.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-6">Store Profile</h2>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+    {{ form|crispy}}
+
+    <button
+        type="submit"
+        class="bg-slate-900 text-white px-6 py-2 rounded-xl">
+        Save Changes
+    </button>
+</form>
+
+{% endblock %}

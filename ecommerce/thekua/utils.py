@@ -2,6 +2,7 @@ import random
 from django.utils.text import slugify
 
 
+
 def generate_otp():
     return str(random.randint(100000,999999))
 
@@ -18,3 +19,14 @@ def generate_unique_slug(model_class, value, slug_field="slug"):
         count += 1
 
     return slug
+
+
+
+# def is_admin(user):
+#     return user.roles.filter(role=Role.ADMIN, active=True).exists()
+
+# def is_seller(user):
+#     return user.roles.filter(role=Role.SELLER, active=True).exists()
+
+# def is_admin_or_seller(user):
+#     return is_admin(user) or is_seller(user)

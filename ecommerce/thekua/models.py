@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
-from .utils import generate_unique_slug
+from .utils import *
 from django.conf import settings
 
 # User = settings.AUTH_USER_MODEL
@@ -80,6 +80,7 @@ class Address(models.Model):
 #     if created:
 #         Profile.objects.create(user=instance)
 
+
 class Category(models.Model):
     name=models.CharField(max_length=200)
     is_active = models.BooleanField(default=True)
@@ -114,9 +115,9 @@ class Product(models.Model):
     subcategory=models.ForeignKey(SubCategory,on_delete=models.CASCADE)
     name=models.CharField(max_length=200)
     description=models.CharField(max_length=500)
-    seller=models.ForeignKey(User,on_delete=models.CASCADE)
+    seller=models.ForeignKey(User,on_delete=models.CASCADE,related_name="products")
     created_at=models.DateField(auto_now_add=True)
-    starting_from=models.CharField(max_length=200,null=True,blank=True)
+    starting_from=models.DecimalField(max_digits=10,decimal_places=2,null=True,blank=True)
     updated_at=models.DateField(auto_now=True)
     is_active=models.BooleanField(default=False)
     slug = models.SlugField(unique=True,blank=True)
@@ -265,3 +266,27 @@ class PaymentHistory(models.Model):
         return f"{self.order.id} - {self.status}"
 
     
+class StoreProfile(models.Model):
+    store_name = models.CharField(max_length=150)
+    owner_name = models.CharField(max_length=100)   # Your mother
+    description = models.TextField()
+    phone = models.CharField(max_length=10)
+    email = models.EmailField()
+    address = models.TextField()
+    gst_number = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,
+        help_text="GSTIN (15 characters)"
+    )
+
+    fssai_number = models.CharField(
+        max_length=14,
+        blank=True,
+        null=True,
+        help_text="FSSAI License Number"
+    )
+    profile = models.ImageField(upload_to="store/", null=True, blank=True)
+
+    def __str__(self):
+        return self.store_name

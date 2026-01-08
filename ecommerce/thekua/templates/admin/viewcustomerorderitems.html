@@ -1,0 +1,26 @@
+{% extends "admin/adminbase.html" %}
+{% block content %}
+
+<h2>Order #{{ order.id }}</h2>
+
+<table class="w-full border">
+    <tr>
+        <th>Product</th>
+        <th>Variant</th>
+        <th>Qty</th>
+        <th>Price</th>
+    </tr>
+
+    {% for item in items %}
+    <tr>
+        <td>{{ item.productvariant.product.name }}</td>
+        <td>{{ item.product_variant }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>₹{{ item.price }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+{% endblock %}

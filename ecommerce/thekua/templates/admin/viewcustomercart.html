@@ -2,14 +2,18 @@
 
 {% block content %}
 
-<h2 class="text-xl font-bold mb-4">
-    Wishlist of {{ user.username }}
-</h2>
+<div class="flex justify-between">
+    <h2 class="text-2xl font-bold mb-4">
+        Cart of {{ user.username }}
+    </h2>
+    <a href="{% url 'viewcustomerprofile' user.id %}" class="text-2xl font-bold mb-4">Back Menu</a>
+</div>
+
 
 <table class="min-w-full bg-white border">
     <thead>
         <tr class="bg-gray-100">
-            <th class="border px-4 py-2">#</th>
+            <th class="border px-4 py-2">id</th>
             <th class="border px-4 py-2">Product</th>
             <th class="border px-4 py-2">Variant</th>
             <th class="border px-4 py-2">Price</th>
@@ -17,14 +21,14 @@
     </thead>
 
     <tbody>
-        {% for item in wishlistitem %}
+        {% for item in cartitems %}
         <tr>
             <td class="border px-4 py-2">{{ forloop.counter }}</td>
             <td class="border px-4 py-2">
                 {{ item.product_variant.product.name }}
             </td>
             <td class="border px-4 py-2">
-                {{ item.product_variant.name }}
+                {{ item.product_variant.weight }}
             </td>
             <td class="border px-4 py-2">
                 ₹{{ item.product_variant.price }}
@@ -33,7 +37,7 @@
         {% empty %}
         <tr>
             <td colspan="4" class="text-center py-4">
-                No wishlist items
+                No cart items
             </td>
         </tr>
         {% endfor %}

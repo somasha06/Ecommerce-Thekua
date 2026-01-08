@@ -3,6 +3,8 @@ from django.shortcuts import render,redirect,get_object_or_404
 from .adminforms import *
 from .decorators import admin_or_seller_required
 from .permissions import *
+from django.db.models import Count, Sum, Max
+
 # from .utils import *
 
 
@@ -16,12 +18,19 @@ def viewproduct(request,id):
     productvariants=product.productvariants.filter(is_active=True)
     default_variant = productvariants.first()
     profile = StoreProfile.objects.first()
+    images = product.images.all()   
+
 
     subcategories=SubCategory.objects.all()
-    return render(request,"view_product.html",{"product":product,"subcategories":subcategories,"productvariants":productvariants,"default_variant":default_variant,"profile":profile})
+    return render(request,"view_product.html",{"product":product,"subcategories":subcategories,"productvariants":productvariants,"default_variant":default_variant,"profile":profile,"images":images})
 
 def dashboard(request):
-    return render(request,"admin/dashboard.html")
+    count={
+        "customers":Role.objects.filter(role=Role.CUSTOMER).count(),
+        "product":Product.objects.count(),
+        "order":Order.objects.count(),
+    }
+    return render(request,"admin/dashboard.html",count)
 
 # @admin_or_seller_required
 def managecategory(request):
@@ -74,13 +83,18 @@ def editsubcategory(request,id):
 
 # @admin_or_seller_required
 def insertproduct(request):
-    form=Productform(request.POST or None,request.FILES or None)
+    form=Productform(request.POST or None)
+    files=request.FILES.getlist("productimages")
+
     if request.method=="POST":
         if form.is_valid():
             product=form.save(commit=False)
-            product.seller=User.objects.filter(roles__role="seller",roles_active=True).first()
+            product.seller=User.objects.filter(roles__role="seller",is_active=True).first()
             product.seller=request.user
             product.save()
+            for file in files:
+                Productimage.objects.create(product=product,productimages=file)
+            
             return redirect(manageproduct)
     return render(request,"admin/insertproduct.html",{"form":form})
 
@@ -95,54 +109,70 @@ def deleteproduct(request,id):
     return redirect(manageproduct)
 
 
-    
 def editproduct(request,id):
     product=Product.objects.get(id=id)
+    files=request.FILES.getlist("productimages")
+
     form=Productform(request.POST or None,request.FILES or None,instance=product)
     if request.method=="POST":
         if form.is_valid():
             form.save()
+            for file in files:
+                Productimage.objects.create(product=product,productimages=file)
             return redirect(manageproduct)
-    return render(request,"admin/editproduct.html",{"product":product,"form":form})
+    images=product.images.all()
+    return render(request,"admin/editproduct.html",{"product":product,"form":form,"images":images})
 
 def allcustomer(request):
-    customers=Role.objects.filter(role=Role.CUSTOMER).select_related("user")
+    customers=Role.objects.filter(role=Role.CUSTOMER).select_related("user").annotate(
+        wishlist_count=Count("user__wishlist__wishlistitem", distinct=True),
+            order_count=Count("user__orders", distinct=True),
+            total_spent=Sum("user__orders__total_price"),
+            last_order=Max("user__orders__created_at"),
+    )
     
-    for customer in customers:
-        customer.wishlist_count = WishlistItem.objects.filter(
-            wishlist__user=customer.user
-        ).count()
-
-
-        customer.order_count = Order.objects.filter(
-            user=customer.user
-        ).count()
-
 
     return render(request,"admin/viewcustomer.html",{"customers":customers})
 
-def allseller(request):
-    sellers=Role.objects.filter(role=Role.SELLER).select_related("user")
-    return render(request,"admin/viewseller.html",{"sellers":sellers})
+def viewcustomerprofile(request,id):
+    user=get_object_or_404(User,id=id)
+    orders=Order.objects.filter(user=user)
+    wishlistitems=WishlistItem.objects.filter(wishlist__user=user)
+    cartitems=CartItem.objects.filter(cart__user=user)
+    addresses = user.address.all()  # related_name="address"
+
+    context={
+        "customer":user,
+        "addresses": addresses,
+        "ordercount":orders.count(),
+        "wishlistcount":wishlistitems.count(),
+        "cartcount":cartitems.count(),
+    }
+
+    return render(request,"admin/viewcustomerprofile.html",context)
 
 
-def customerwishlist(request,user_id):
-    user=get_object_or_404(User,id=user_id)
+def viewcustomerwishlist(request,id):
+    user=get_object_or_404(User,id=id)
     wishlistitem=WishlistItem.objects.filter(wishlist__user=user).select_related("product_variant", "product_variant__product")
-    return render(request,"admin/customerwishlist.html",{"user":user,"wishlistitems":wishlistitem})
+    return render(request,"admin/viewcustomerwishlist.html",{"user":user,"wishlistitem":wishlistitem})
 
+def viewcustomercart(request,id):
+    user=get_object_or_404(User,id=id)
+    cartitems=CartItem.objects.filter(cart__user=user).select_related("product_variant", "product_variant__product")
 
+    return render(request,"admin/viewcustomercart.html",{"user":user,"cartitems":cartitems})
 
-def customerorder(request,user_id):
-    user=get_object_or_404(User,id=user_id)
-    orders=Order.objects.filter(user=user).order_by("-created_at")
-    return render(request,"admin/customerorder.html",{"user":user,"orders":orders})
+def viewcustomerorder(request,id):
+    user=get_object_or_404(User,id=id)
+    orders=Order.objects.filter(user=user).select_related("user").order_by("-created_at")
+    return render(request,"admin/viewcustomerorder.html",{"user":user,"orders":orders})
 
-def orderitems(request,order_id):
+def viewcustomerorderitems(request,order_id):
     order=get_object_or_404(Order,id=order_id)
 
     items=OrderItem.objects.filter(order=order).select_related("product_variant","product_variant__product")
-    return render(request,"admin/orderitems.html",{"order":order,"items":items})
+    return render(request,"admin/viewcustomerorderitems.html",{"order":order,"items":items})
 
 def paidorders(request):
     
@@ -192,3 +222,10 @@ def storeprofile(request):
 def about(request):
     profile = StoreProfile.objects.get(id=1)
     return render(request, "about.html", {"profile": profile})
+
+def deleteproductimage(requset,image_id):
+    images=get_object_or_404(Productimage,id=image_id)
+    product_id=images.product.id
+    if requset.method=="POST":
+        images.delete()
+    return redirect("editproduct",id=product_id)

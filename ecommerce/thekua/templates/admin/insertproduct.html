@@ -11,6 +11,7 @@
                 {% csrf_token %}
                 {{form|crispy}}
                 <div class="mb-3">
+                    <input type="file" name="productimages" multiple>
                     <input type="submit" value="insert product" class="bg-green-200 text-black w-full rounded px-3 py-2">
                 </div>
             </form>

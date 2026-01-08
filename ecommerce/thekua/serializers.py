@@ -100,8 +100,17 @@ class LoginSerializer(serializers.Serializer):
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model=Address
-        fields="__all__"
+        exclude = ["user"]
         read_only_fields=["user"]
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["email", "mobile_no","profile_pic"]
+        extra_kwargs = {
+            "email": {"required": True},
+            # "mobile_no": {"required": True}
+        }
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -124,16 +133,22 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         model=ProductVariant
         fields=["id","product","product_name","weight","price","discount_price","stock","sku","is_active"]
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Productimage
+        fields=["id","productimages"]
+
 class ProductSerializer(serializers.ModelSerializer):
     subcategory_name=serializers.ReadOnlyField(source="subcategory.name")
-    # seller_username=serializers.ReadOnlyField(source="seller.username")
-    # variants = ProductVariantSerializer(many=True, read_only=True)
     is_wishlisted = serializers.BooleanField(read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
         model=Product
-        fields=["id","name","subcategory","subcategory_name","starting_from","is_active","slug","image","is_wishlisted"]
+        fields=["id","name","subcategory","subcategory_name","starting_from","is_active","images","slug","is_wishlisted"]
         read_only_fields = ["slug"]
+
+
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     subcategory_name=serializers.ReadOnlyField(source="subcategory.name")
@@ -202,3 +217,12 @@ class OrderSerializer(serializers.ModelSerializer):
         fields=["id","user","status","total_price","created_at","items"]
 
         read_only_fields=["user","total_price","created_at"]
+
+class CouponApplySerializer(serializers.Serializer):
+    code=serializers.CharField()
+    # cart_total=serializers.DecimalField(max_digits=10,decimal_places=2)
+
+class GetCouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Coupon
+        fields=["code","discount_type","discount_amount","min_price","max_price","expires_at",]

@@ -40,7 +40,7 @@
     </p>
 
     <div class="mt-6 text-sm text-gray-600 space-y-1">
-    <p><strong>Owner:</strong> {{ profile.owner_name }}</p>
+    {% comment %} <p><strong>Owner:</strong> {{ profile.owner_name }}</p> {% endcomment %}
 
     {% if profile.gst_number %}
         <p><strong>GSTIN:</strong> {{ profile.gst_number }}</p>

@@ -17,6 +17,11 @@ admin.site.register(WishlistItem)
 admin.site.register(CartItem)
 admin.site.register(OrderItem)
 admin.site.register(Reviews)
+# admin.site.register(Coupon)
+@admin.register(Coupon)
+class CouponAdmin(admin.ModelAdmin):
+    list_display = ("code", "discount_type", "discount_amount", "expires_at", "active")
+    search_fields = ("code",)
 
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):

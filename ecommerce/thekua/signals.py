@@ -1,16 +1,14 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.conf import settings
-from thekua.models import *
+from django.contrib.auth import get_user_model
+from thekua.models import Wishlist, Cart
 
-User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_user_wishlist(sender, instance, created, **kwargs):
+
+@receiver(post_save, sender=User)
+def create_user_related_objects(sender, instance, created, **kwargs):
     if created:
-        Wishlist.objects.create(user=instance)
+        Wishlist.objects.get_or_create(user=instance)
+        Cart.objects.get_or_create(user=instance)
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_user_cart(sender, instance, created, **kwargs):
-    if created:
-        Cart.objects.create(user=instance)

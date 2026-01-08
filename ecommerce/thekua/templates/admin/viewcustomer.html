@@ -14,15 +14,14 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
-                        <th
-                            class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center w-16">
-                            ID</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center w-16">ID</th>
                         <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
                         <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
-                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
-                            Activity</th>
-                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
-                            Actions</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Orders</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total Spend</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Last Order</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Status</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -39,22 +38,18 @@
                             </div>
                         </td>
                         <td class="py-4 px-6 text-sm text-slate-600">{{ customer.user.email }}</td>
-                        <td class="py-4 px-6 text-center">
-                            <div class="flex items-center justify-center gap-4">
-                                <a href="{% url 'customerwishlist' customer.user.id %}"
-                                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-medium hover:bg-rose-100 transition-colors"
-                                    title="View Wishlist">
-                                    <i class="fa-regular fa-heart"></i> {{ customer.wishlist_count }}
-                                </a>
-                                <a href="{% url 'customerorder' customer.user.id %}"
-                                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition-colors"
-                                    title="View Orders">
-                                    <i class="fa-solid fa-bag-shopping"></i> {{ customer.order_count }}
-                                </a>
-                            </div>
+                        <td class="py-4 px-6 text-sm font-mono text-slate-600 text-center">{{ customer.total_orders}}</td>
+                        <td class="py-4 px-6 text-sm font-mono text-slate-600 text-center">{{ customer.total_spent|default:"0"}}</td>
+                        <td>{{ c.last_order|default:"—" }}</td>
+                        <td>
+                            {% if customer.active %}
+                                <span class="text-green-600">Active</span>
+                            {% else %}
+                                <span class="text-red-600">Blocked</span>
+                            {% endif %}
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <a href=""
+                            <a href="{% url 'viewcustomerprofile' customer.user.id %}"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold tracking-wide uppercase text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-all">
                                 Profile
                             </a>

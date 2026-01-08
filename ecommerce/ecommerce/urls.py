@@ -49,6 +49,11 @@ urlpatterns = [
     path("checkout/", CheckoutView.as_view(), name="checkout"),
     path("payment/create/", CreatePaymentView.as_view()),
     path("payment/verify/", VerifyPaymentView.as_view()),
+    path("customer/profile/", CustomerProfileUpdateView.as_view()),
+    path("cart/applycoupon/", ApplyCouponView.as_view(), name="apply-coupon"),
+    path("cart/removecoupon/", RemoveCouponView.as_view()),
+
+    path("getcoupon/",GetCouponView.as_view()),
 
     path("",home,name="homepage"),
     path("p/<int:id>",viewproduct,name="viewproduct"),
@@ -63,12 +68,15 @@ urlpatterns = [
     path("admin/productvariant/<int:id>/",deleteproductvariant,name="deleteproductvariant"),
     path("admin/manageproduct",manageproduct,name="manageproduct"),
     path("admin/manageproductvariant",manageproductvariant,name="manageproductvariant"),
-    path("admin/seller",allseller,name="allseller"),
+
     path("admin/customer", allcustomer, name="allcustomer"),
-    path("admin/customer/<int:user_id>/wishlist/",customerwishlist, name="customerwishlist"),
-    path("admin/customer/<int:user_id>/orders/",customerorder, name="customerorder"),
-    path("admin/order/<int:order_id>/items/",orderitems,name="orderitems"),
-    path("admin/orders/paid/",paidorders, name="paidorders"),
+    path("admin/customer/<int:id>/",viewcustomerprofile , name="viewcustomerprofile"),
+    path("admin/customer/<int:id>/wishlist/",viewcustomerwishlist, name="viewcustomerwishlist"),
+    path("admin/customer/<int:id>/cart/",viewcustomercart, name="viewcustomercart"),
+    path("admin/customer/<int:id>/orders/",viewcustomerorder, name="viewcustomerorder"),
+    path("admin/customerorder/<int:id>/items/",viewcustomerorderitems,name="viewcustomerorderitems"),
+    path("admin/customerorders/paid/",paidorders, name="paidorders"),
+
     path("admin/storeprofile",storeprofile,name="storeprofile"),
     path("about/",about, name="about"),
     path("admin/category/<int:id>/edit/", editcategory, name="editcategory"),

@@ -38,3 +38,27 @@ class IsAdminOrSeller(HasRole):
 
 class IsAdminorCustomer(HasRole):
     allowed_roles=[Role.ADMIN,Role.CUSTOMER]
+
+
+class IsAdminOrSellerOrReadOnly(BasePermission):
+
+
+    def has_permission(self, request, view):
+        # Allow read-only methods for everyone
+        if request.method in SAFE_METHODS:
+            return True
+
+        # Write permissions → Admin or Seller only
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        return request.user.roles.filter(
+            role__in=[Role.ADMIN, Role.SELLER],
+            active=True
+        ).exists()
+
+class IsAdminOrCustomerReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return request.user.is_authenticated
+        return request.user.roles.filter(role=Role.CUSTOMER, active=True).exists()

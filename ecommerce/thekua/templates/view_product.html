@@ -20,17 +20,38 @@
             <div class="space-y-6">
                 <div
                     class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden aspect-square flex items-center justify-center p-8 relative group">
-                    {% if product.image %}
-                    <img src="{{product.image.url}}" alt="{{product.name}}"
-                        class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500">
-                    {% else %}
-                    <i class="fa-regular fa-image text-6xl text-slate-200"></i>
-                    {% endif %}
+                    {% if images %}
+        <!-- Slides -->
+        <div id="slider" class="w-full h-full relative">
+            {% for img in images %}
+                <img src="{{ img.productimages.url }}"
+                     class="slide absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500"
+                     {% if forloop.first %}style="opacity:1"{% endif %}>
+            {% endfor %}
+        </div>
 
-                    <span
-                        class="absolute top-6 left-6 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                        {{ product.subcategory|default:"Authentic" }}
-                    </span>
+        <!-- Left Arrow -->
+        <button onclick="prevSlide()"
+                class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow">
+            ‹
+        </button>
+
+        <!-- Right Arrow -->
+        <button onclick="nextSlide()"
+                class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow">
+            ›
+        </button>
+
+    {% else %}
+        <div class="flex items-center justify-center h-full">
+            <i class="fa-regular fa-image text-6xl text-slate-200"></i>
+        </div>
+    {% endif %}
+
+    <span
+        class="absolute top-6 left-6 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+        {{ product.subcategory|default:"Authentic" }}
+    </span>
                 </div>
             </div>
 
@@ -186,6 +207,29 @@ function addToCart() {
     .then(() => alert("Added to cart"))
 }
 </script>
+
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll(".slide");
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.style.opacity = i === index ? "1" : "0";
+        });
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+    }
+</script>
+
 
 
 {% endblock %}

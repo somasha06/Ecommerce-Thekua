@@ -1,5 +1,5 @@
 from .models import *
-from django.forms import ModelForm
+from django.forms import ModelForm,ImageField,FileInput
 
 class Categoryform(ModelForm):
     class Meta:

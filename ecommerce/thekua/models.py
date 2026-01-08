@@ -2,16 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 from django.utils import timezone
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
-from .utils import *
 from django.conf import settings
 
-# User = settings.AUTH_USER_MODEL
-# User = get_user_model()
-# Create your models here.
 
 class User(AbstractUser):
     email=models.EmailField(unique=True)
@@ -47,7 +41,7 @@ class Role(models.Model):
 
     role=models.CharField(max_length=20,choices=ROLE_CHOICES)
     user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="roles")
-    active=models.BooleanField(default=False)
+    active=models.BooleanField(default=True)
 
     class Meta:
         unique_together=("user","role")
@@ -121,7 +115,7 @@ class Product(models.Model):
     updated_at=models.DateField(auto_now=True)
     is_active=models.BooleanField(default=False)
     slug = models.SlugField(unique=True,blank=True)
-    image=models.ImageField(upload_to="products/", null=True, blank=True)
+    # image=models.ImageField(upload_to="products/", null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -164,8 +158,38 @@ class WishlistItem(models.Model):
     def __str__(self):
         return f"{self.product_variant.product.name} in {self.wishlist.user.username}'s wishlist"
 
+class Coupon(models.Model):
+    code=models.CharField(max_length=50,unique=True)
+
+    DISCOUNT_TYPE_CHOICES=(
+        ("flat","Flat Discount"),
+        ("percent","Percentage Discount")
+    )
+    discount_type=models.CharField(max_length=10,choices=DISCOUNT_TYPE_CHOICES,default="percent")
+    min_price=models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    max_price=models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    discount_amount=models.PositiveIntegerField(null=True,blank=True)
+    expires_at=models.DateField()
+    usage_limit=models.IntegerField(default=5)
+    used_count=models.IntegerField(default=0)
+    active=models.BooleanField(default=True)
+
+    def is_valid(self):
+        now=timezone.now().date()
+
+        return(
+            self.active
+            and now <= self.expires_at
+            and self.used_count < self.usage_limit
+        )
+    
+    def __str__(self):
+        return self.code
+    
+
 class Cart(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,related_name="cart")
+    coupon=models.ForeignKey("thekua.Coupon",on_delete=models.SET_NULL,null=True,blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -176,6 +200,10 @@ class CartItem(models.Model):
     product_variant=models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
     quantity=models.PositiveIntegerField(default=1)
     added_at=models.DateTimeField(auto_now_add=True)
+
+    @property
+    def total_price(self):
+        return self.product_variant.price * self.quantity
 
     class Meta:
         constraints=[models.UniqueConstraint(fields=["cart","product_variant"],name="unique_cart_product")]
@@ -193,8 +221,12 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="orders")
+    coupon=models.ForeignKey(Coupon,on_delete=models.SET_NULL,null=True,blank=True)
     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default="pending")
     total_price=models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    discount_price=models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    final_price=models.DecimalField(max_digits=10,decimal_places=2,default=0)
+
     created_at=models.DateTimeField(auto_now_add=True)
 
     razorpay_order_id=models.CharField(max_length=255,blank=True,null=True)
@@ -212,20 +244,6 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product_variant} x {self.quantity}"
-    
-
-class Reviews(models.Model):
-    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="reviews")
-    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="reviews")
-    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])    
-    comments=models.TextField(blank=True)
-    created_at=models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together=("product","user")
-
-    def __str__(self):
-        return f"{self.product.name} - {self.rating}⭐ by {self.user.username}"
 
 
 class PaymentHistory(models.Model):
@@ -290,3 +308,27 @@ class StoreProfile(models.Model):
 
     def __str__(self):
         return self.store_name
+
+class Productimage(models.Model):
+    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="images")
+    productimages=models.ImageField(upload_to="productimages/")
+
+    def __str__(self):
+        return f"Image of {self.product.name}"
+    
+class Reviews(models.Model):
+    product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="reviews")
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="reviews")
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])    
+    comments=models.TextField(blank=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together=("product","user")
+
+    def __str__(self):
+        return f"{self.product.name} - {self.rating}⭐ by {self.user.username}"
+
+    
+
+

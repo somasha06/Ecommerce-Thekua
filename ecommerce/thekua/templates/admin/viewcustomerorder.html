@@ -13,7 +13,9 @@
             <th class="border px-4 py-2">Total</th>
             <th class="border px-4 py-2">Status</th>
             <th class="border px-4 py-2">Date</th>
-            <th class="border px-4 py-2">Amount</th>
+            <th class="border px-4 py-2">Coupon</th>
+            <th class="border px-4 py-2">Discount</th>
+            <th class="border px-4 py-2">final Amount</th>
             <th class="border px-4 py-2">Action</th>
         </tr>
     </thead>
@@ -27,7 +29,9 @@
             <td class="border px-4 py-2">
                 {{ order.created_at|date:"d M Y" }}
             </td>
-            <td class="border px-4 py-2">{{ order.total_price}}</td>
+            <td class="border px-4 py-2">{{ order.coupon}}</td>
+            <td class="border px-4 py-2">{{ order.discount_price}}</td>
+            <td class="border px-4 py-2">{{ order.final_price}}</td>
 
             <td class="border px-4 py-2">
                 <a href="{% url 'viewcustomerorderitems' order.id %}" class="text-blue-600 font-semibold">

@@ -4,6 +4,8 @@ from .adminforms import *
 from .decorators import admin_or_seller_required
 from .permissions import *
 from django.db.models import Count, Sum, Max
+from django.contrib.auth import logout
+
 
 # from .utils import *
 
@@ -68,8 +70,8 @@ def managesubcategory(request):
     return render(request,"admin/managesubcategory.html",{"form":form,"subcategories":subcategories})
 
 def deletesubcategory(request,id):
-    deletedcategory=SubCategory.objects.get(id=id)
-    deletedcategory.delete()
+    deletedsubcategory=SubCategory.objects.get(id=id)
+    deletedsubcategory.delete()
     return redirect(managesubcategory)
 
 def editsubcategory(request,id):
@@ -168,18 +170,19 @@ def viewcustomerorder(request,id):
     orders=Order.objects.filter(user=user).select_related("user").order_by("-created_at")
     return render(request,"admin/viewcustomerorder.html",{"user":user,"orders":orders})
 
-def viewcustomerorderitems(request,order_id):
-    order=get_object_or_404(Order,id=order_id)
+def viewcustomerorderitems(request,id):
+    order=get_object_or_404(Order,id=id)
 
     items=OrderItem.objects.filter(order=order).select_related("product_variant","product_variant__product")
     return render(request,"admin/viewcustomerorderitems.html",{"order":order,"items":items})
 
-def paidorders(request):
+def totalorders(request):
     
     paidorders=Order.objects.filter(status="success").order_by("-created_at")
-    pendingorders=Order.objects.filter(status="failed").order_by("-created_at")
+    pendingorders=Order.objects.filter(status="pending").order_by("-created_at")
+    failedorders=Order.objects.filter(status="failed").order_by("-created_at")
 
-    return render(request,"admin/paidorder.html",{"paidorders":paidorders,"pendingorders":pendingorders})
+    return render(request,"admin/totalorder.html",{"paidorders":paidorders,"pendingorders":pendingorders,"failedorders":failedorders})
 
 def insertproductvariant(request):
     form=Productvariantform(request.POST or None, request.FILES or None)
@@ -229,3 +232,6 @@ def deleteproductimage(requset,image_id):
     if requset.method=="POST":
         images.delete()
     return redirect("editproduct",id=product_id)
+
+# def logout(request):
+#     return redirect(request,"admin/adminbase.html")

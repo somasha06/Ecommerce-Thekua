@@ -29,20 +29,20 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    {% for paidorder in paidorders %}
+                    {% for order in paidorders %}
                     <tr class="hover:bg-slate-50/80 transition-colors group">
-                        <td class="py-4 px-6 text-sm font-mono text-slate-600">#{{ paidorder.id }}</td>
+                        <td class="py-4 px-6 text-sm font-mono text-slate-600">#{{ order.id }}</td>
                         <td class="py-4 px-6 text-sm font-medium text-slate-800">
-                            {{ paidorder.user.username }}
+                            {{ order.user.username }}
                         </td>
                         <td class="py-4 px-6 text-sm font-bold text-slate-800">₹{{ order.total_price }}</td>
                         <td class="py-4 px-6 text-sm text-slate-500">
-                            {{ paidorder.created_at|date:"M d, Y" }}
+                            {{ order.created_at|date:"M d, Y" }}
                         </td>
                         <td class="py-4 px-6">
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                {{ paidorder.status }}
+                                {{ order.status }}
                             </span>
                         </td>
                         <td class="py-4 px-6 text-right">
@@ -90,24 +90,24 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    {% for pendingorder in pendingorders %}
+                    {% for order in pendingorders %}
                     <tr class="hover:bg-slate-50/80 transition-colors group">
-                        <td class="py-4 px-6 text-sm font-mono text-slate-600">#{{ pendingorder.id }}</td>
+                        <td class="py-4 px-6 text-sm font-mono text-slate-600">#{{ order.id }}</td>
                         <td class="py-4 px-6 text-sm font-medium text-slate-800">
-                            {{ pendingorder.user.username }}
+                            {{ order.user.username }}
                         </td>
                         <td class="py-4 px-6 text-sm font-bold text-slate-800">₹{{ order.total_price }}</td>
                         <td class="py-4 px-6 text-sm text-slate-500">
-                            {{ pendingorder.created_at|date:"M d, Y" }}
+                            {{ order.created_at|date:"M d, Y" }}
                         </td>
                         <td class="py-4 px-6">
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                {{ pendingorder.status }}
+                                {{ order.status }}
                             </span>
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <a href=""
+                            <a href="{% url 'viewcustomerorderitems' order.id %}"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all border border-slate-200">
                                 View Items <i class="fa-solid fa-chevron-right text-xs"></i>
                             </a>
@@ -116,6 +116,66 @@
                     {% empty %}
                     <tr>
                         <td colspan="6" class="py-12 text-center text-slate-500">No paid orders found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Failed Orders</h2>
+            <p class="text-slate-500 text-sm mt-1">Track and manage incompleted transactions.</p>
+        </div>
+        <button
+            class="px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20">
+            <i class="fa-solid fa-download mr-2"></i> Export CSV
+        </button>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Order ID</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Total Amount
+                        </th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                        <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                            Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for order in failedorders %}
+                    <tr class="hover:bg-slate-50/80 transition-colors group">
+                        <td class="py-4 px-6 text-sm font-mono text-slate-600">#{{ order.id }}</td>
+                        <td class="py-4 px-6 text-sm font-medium text-slate-800">
+                            {{ order.user.username }}
+                        </td>
+                        <td class="py-4 px-6 text-sm font-bold text-slate-800">₹{{ order.total_price }}</td>
+                        <td class="py-4 px-6 text-sm text-slate-500">
+                            {{ order.created_at|date:"M d, Y" }}
+                        </td>
+                        <td class="py-4 px-6">
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <a href="{% url 'viewcustomerorderitems' order.id %}"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all border border-slate-200">
+                                View Items <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-slate-500">No failed orders found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -1,20 +1,5 @@
-"""
-URL configuration for ecommerce project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
+from django.contrib.auth import authenticate,logout
 from django.urls import path,include
 from rest_framework import routers
 from rest_framework.routers import DefaultRouter
@@ -25,13 +10,13 @@ from thekua.adminviews import *
 
 router = routers.DefaultRouter()
 router.register(r"address", AddressViewSet, basename="address")
-router.register(r"categories",CategoryViewSet,basename="category")
-router.register(r"subcategories",SubcategoryViewSet,basename="subcategory")
-router.register(r"products",ProductViewSet,basename="product")
-router.register(r"productsvariants",ProductVariantViewSet,basename="productvariant")
+router.register(r"category",CategoryViewSet,basename="category")
+router.register(r"subcategory",SubcategoryViewSet,basename="subcategory")
+router.register(r"product",ProductViewSet,basename="product")
+router.register(r"productsvariant",ProductVariantViewSet,basename="productvariant")
 # router.register(r"wishlist",WishlistViewSet,basename="wishlist")
-router.register(r"wishlists", WishlistViewSet, basename="wishlist")
-router.register(r"wishlistitems", WishlistItemViewSet, basename="wishlist-items")
+router.register(r"wishlist", WishlistViewSet, basename="wishlist")
+router.register(r"wishlistitem", WishlistItemViewSet, basename="wishlist-items")
 router.register(r"cart", CartViewSet, basename="cart")
 router.register(r"cartitem", CartItemViewSet, basename="cartitem")
 router.register(r"orderitem", OrderItemViewSet, basename="orderitem")
@@ -47,8 +32,8 @@ urlpatterns = [
     path("verify-otp/", OTPVerifyAPIView.as_view()),
     path("login/", LoginAPIView.as_view(), name="login"),
     path("checkout/", CheckoutView.as_view(), name="checkout"),
-    path("payment/create/", CreatePaymentView.as_view()),
-    path("payment/verify/", VerifyPaymentView.as_view()),
+    path("createpayment/", CreatePaymentView.as_view()),
+    path("verifypayment/", VerifyPaymentView.as_view()),
     path("customer/profile/", CustomerProfileUpdateView.as_view()),
     path("cart/applycoupon/", ApplyCouponView.as_view(), name="apply-coupon"),
     path("cart/removecoupon/", RemoveCouponView.as_view()),
@@ -70,12 +55,12 @@ urlpatterns = [
     path("admin/manageproductvariant",manageproductvariant,name="manageproductvariant"),
 
     path("admin/customer", allcustomer, name="allcustomer"),
-    path("admin/customer/<int:id>/",viewcustomerprofile , name="viewcustomerprofile"),
+    path("admin/customer/<int:id>/",viewcustomerprofile,name="viewcustomerprofile"),
     path("admin/customer/<int:id>/wishlist/",viewcustomerwishlist, name="viewcustomerwishlist"),
     path("admin/customer/<int:id>/cart/",viewcustomercart, name="viewcustomercart"),
     path("admin/customer/<int:id>/orders/",viewcustomerorder, name="viewcustomerorder"),
     path("admin/customerorder/<int:id>/items/",viewcustomerorderitems,name="viewcustomerorderitems"),
-    path("admin/customerorders/paid/",paidorders, name="paidorders"),
+    path("admin/customerorders/totalorders/",totalorders, name="totalorders"),
 
     path("admin/storeprofile",storeprofile,name="storeprofile"),
     path("about/",about, name="about"),

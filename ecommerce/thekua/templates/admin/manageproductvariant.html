@@ -2,15 +2,17 @@
 {% block content %}
 
 
-<h2 class="text-2xl font-bold mb-4">Product Variants</h2>
+<div class="flex justify-between">
+    <h2 class="text-2xl font-bold mb-4">Product Variants</h2>
 
-<a href="{% url 'insertproductvariant' %}"
-   class="bg-indigo-600 text-white px-4 py-2 rounded">
-   + Add Variant
-</a>
+    <a href="{% url 'insertproductvariant' %}"
+    class="bg-indigo-600 text-white px-4 py-2 rounded">
+    + Add Variant
+    </a>
+</div>
 
 
-<table class="w-full border">
+<table class="w-full border mt-5">
     <thead class="bg-gray-100">
         <tr>
             <th class="p-3">Product</th>
@@ -31,12 +33,12 @@
             <td>{{ v.discount_price|default:"—" }}</td>
             <td>{{ v.stock }}</td>
             <td>{{ v.sku }}</td>
-            <td>
+            <td class="flex gap-2">
                 <a href="{% url 'deleteproductvariant' v.id %}"
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 hover:scale-105 transition-all"
                     title="Delete" onclick="return confirm('Are you sure?');">
                     <i class="fa-solid fa-trash text-xs"></i>
-                </a>delete
+                </a>
                 <a href="{% url 'editproductvariant' v.id %}"
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all"
                     title="Edit">

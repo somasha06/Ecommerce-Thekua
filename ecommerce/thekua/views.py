@@ -229,7 +229,8 @@ class WishlistItemViewSet(ModelViewSet):
     permission_classes=[IsAdminOrCustomerReadOnly]
 
     def get_queryset(self):
-        return WishlistItem.objects.filter(wishlist__user=self.request.user).select_related("product_variant","product_variant__product")
+        wishlist, _ = Wishlist.objects.get_or_create(user=self.request.user)
+        return WishlistItem.objects.filter(wishlist=wishlist).select_related("product_variant","product_variant__product")
     
     def perform_create(self, serializer):
 
@@ -242,10 +243,10 @@ class WishlistItemViewSet(ModelViewSet):
         if not variant_id:
             return Response({"error": "product_variant is required"},status=400)
         
-        # wishlist,_=Wishlist.objects.get_or_create(user=request.user)
+        wishlist,_=Wishlist.objects.get_or_create(user=request.user)
         product_variant=get_object_or_404(ProductVariant,id=variant_id)
 
-        item,created=WishlistItem.objects.get_or_create(wishlist=request.user.wishlist,product_variant=product_variant)
+        item,created=WishlistItem.objects.get_or_create(wishlist=wishlist,product_variant=product_variant)
 
         serializer=self.get_serializer(item)
         return Response(serializer.data,status=201 if created else 200)
@@ -280,23 +281,70 @@ class WishlistItemViewSet(ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-class CartViewSet(ReadOnlyModelViewSet):
+class CartViewSet(ModelViewSet):
     serializer_class=CartSerializer
     permission_classes=[IsAdminOrCustomerReadOnly]
 
     def get_queryset(self):
         return Cart.objects.filter(user=self.request.user)
     
+    @action(detail=False, methods=["post"])
+    def applycoupon(self, request):
+        code = request.data.get("code")
+
+        if not code:
+            return Response(
+                {"detail": "Coupon code is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
+        coupon = Coupon.objects.filter(code__iexact=code, active=True).first()
+
+        if not coupon:
+            return Response(
+                {"detail": "Invalid coupon"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cart.coupon = coupon
+        cart.save()
+
+        return Response(
+            {"detail": "Coupon applied successfully"},
+            status=status.HTTP_200_OK
+        )
+    
+    @action(detail=False, methods=["post"])
+    def removecoupon(self, request):
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
+        if not cart.coupon:
+            return Response(
+                {"detail": "No coupon applied"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cart.coupon = None
+        cart.save()
+
+        return Response(
+            {"detail": "Coupon removed successfully"},
+            status=status.HTTP_200_OK
+        )
+    
 class CartItemViewSet(ModelViewSet):
     serializer_class=CartItemSerializer
     permission_classes=[IsAdminOrCustomerReadOnly]
 
     def get_queryset(self):
-        return CartItem.objects.filter(cart__user=self.request.user).select_related("product_variant","product_variant__product")
+        cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        return CartItem.objects.filter(cart=cart).select_related("product_variant","product_variant__product")
     
     def perform_create(self, serializer):
-
-        serializer.save(cart=self.request.user.cart)
+        cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        serializer.save(cart=cart)
 
     @action(detail=False,methods=["post"])
     def add(self,request):
@@ -379,7 +427,7 @@ class CheckoutView(APIView):
         coupon = cart.coupon
 
 
-         # 2️⃣ Apply coupon if exists
+        
         if coupon:
             if not coupon.is_valid():
                 return Response(
@@ -416,10 +464,6 @@ class CheckoutView(APIView):
             coupon.used_count = F("used_count") + 1
             coupon.save(update_fields=["used_count"])
 
-        # 6️⃣ Clear cart
-        cart.items.all().delete()
-        cart.coupon = None
-        cart.save()
 
         return Response(
             {
@@ -443,20 +487,15 @@ class CreatePaymentView(APIView):
             status__in=["pending", "failed"]
         )
 
-        # 🔐 Safety check
+       
         if order.final_price <= 0:
-            return Response(
-                {"detail": "Invalid order amount"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "Invalid order amount"},status=status.HTTP_400_BAD_REQUEST)
 
-        client = razorpay.Client(
-            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-        )
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-        # ✅ Use FINAL PRICE
+        
         razorpay_order = client.order.create({
-            "amount": int(order.final_price * 100),  # paise
+            "amount": int(order.final_price),  
             "currency": "INR",
             "payment_capture": 1
         })
@@ -467,18 +506,13 @@ class CreatePaymentView(APIView):
         order.status = "pending"
         order.save(update_fields=["razorpay_order_id", "razorpay_payment_id", "status"])
 
-        PaymentHistory.objects.create(
-            user=request.user,
-            order=order,
-            razorpay_order_id=razorpay_order["id"],
-            amount=order.final_price,   # ✅ final price
-            status="created"
+        PaymentHistory.objects.create(user=request.user,order=order,razorpay_order_id=razorpay_order["id"],amount=order.final_price,   
         )
 
         return Response({
             "razorpay_order_id": razorpay_order["id"],
             "razorpay_key": settings.RAZORPAY_KEY_ID,
-            "amount": int(order.final_price * 100),
+            "amount": int(order.final_price),
             "currency": "INR"
         }, status=status.HTTP_200_OK)
 
@@ -506,7 +540,7 @@ class VerifyPaymentView(APIView):
             auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
         )
 
-        # 🔐 Verify signature
+        
         try:
             client.utility.verify_payment_signature({
                 "razorpay_order_id": data.get("razorpay_order_id"),

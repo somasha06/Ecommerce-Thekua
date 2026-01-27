@@ -33,6 +33,9 @@ ALLOWED_HOSTS = [
     "72.61.224.176"
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.momscrunch.com",
+]
 
 # Application definition
 

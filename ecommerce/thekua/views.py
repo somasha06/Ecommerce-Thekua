@@ -1,12 +1,12 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import *
+from django.shortcuts import render #**
+from rest_framework.views import APIView #**
+from rest_framework.response import Response #**
+from rest_framework import status #**
+from .serializers import * #**
 from django.contrib.auth import login
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
-from .models import *
+from .models import *  #**
 from rest_framework.viewsets import ModelViewSet
 from django.db.models import Exists, OuterRef, BooleanField, Value
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -14,7 +14,7 @@ from rest_framework.decorators import action
 from .permissions import *
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny #**
 from django.db.models import Q,Min
 from decimal import Decimal, InvalidOperation
 from django.db.models.functions import Coalesce
@@ -118,7 +118,7 @@ class SubcategoryViewSet(ModelViewSet):
 
         category_id=self.request.query_params.get("category")
         if category_id:
-            queryset=queryset.filter(category_id=category_id)
+            queryset=queryset.filter(category_id=category_id) #✔️ Filters subcategories of that category only
         return queryset
     
 class ProductViewSet(ModelViewSet):
@@ -233,7 +233,6 @@ class WishlistItemViewSet(ModelViewSet):
         return WishlistItem.objects.filter(wishlist=wishlist).select_related("product_variant","product_variant__product")
     
     def perform_create(self, serializer):
-
         serializer.save(wishlist=self.request.user.wishlist)
 
     @action(detail=False, methods=["post"])
@@ -256,9 +255,6 @@ class WishlistItemViewSet(ModelViewSet):
     def remove(self,request):
         variant_id=request.data.get("product_variant")
 
-
-
-       
         if not variant_id:
             return Response(
                 {"detail": "product_variant is required"},

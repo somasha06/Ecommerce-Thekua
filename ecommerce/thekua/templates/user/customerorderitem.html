@@ -1,0 +1,51 @@
+{% extends "admin/adminbase.html" %}
+
+{% block content %}
+
+<h2 class="text-xl font-bold mb-4">
+    Order #{{ order.id }} – Items
+</h2>
+
+<table class="min-w-full bg-white border">
+    <thead>
+        <tr class="bg-gray-100">
+            <th class="border px-4 py-2">#</th>
+            <th class="border px-4 py-2">Product</th>
+            <th class="border px-4 py-2">Variant</th>
+            <th class="border px-4 py-2">Price</th>
+            <th class="border px-4 py-2">Qty</th>
+            <th class="border px-4 py-2">Subtotal</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td class="border px-4 py-2">{{ forloop.counter }}</td>
+            <td class="border px-4 py-2">
+                {{ item.product_variant.product.name }}
+            </td>
+            <td class="border px-4 py-2">
+                {{ item.product_variant.name }}
+            </td>
+            <td class="border px-4 py-2">
+                ₹{{ item.price }}
+            </td>
+            <td class="border px-4 py-2">
+                {{ item.quantity }}
+            </td>
+            {% comment %} <td class="border px-4 py-2">
+                ₹{{ item.quantity|mul:item.price }}
+            </td> {% endcomment %}
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center py-4">
+                No items found
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

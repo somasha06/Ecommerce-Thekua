@@ -8,12 +8,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 User=get_user_model()
 
-class SignupRequestSerializer(serializers.Serializer):
-    email=serializers.EmailField(required=False)
+class SignupRequestSerializer(serializers.Serializer):# here Serializer take input from user and store temporarly (handle requset data) but modelserializer store data in database
+    email=serializers.EmailField(required=False) # here email is serializer field which i defined same for mobile and profile it doen't care of model field 
     mobile_no=serializers.CharField(required=False)
     profile_pic=serializers.ImageField(required=False)
 
-    def validate(self,data):
+    def validate(self,data): #default method of drf
         if not data.get("email") and not data.get("mobile_no"):
             raise serializers.ValidationError("Email or mobile number is required")
         return data
@@ -22,9 +22,9 @@ class SignupRequestSerializer(serializers.Serializer):
         otp=generate_otp()
 
         pending_user=PendingUser.objects.create(
-            email=validated_data.get("email"),
+            email=validated_data.get("email"), #here email is model field
             mobile_no=validated_data.get("mobile_no"),
-            otp=otp #sesseion id and created at is filled automatically by  Django 
+            otp=otp #sesseion id and created_at is filled automatically by  Django 
         )
 
         send_otp(validated_data.get("email") or validated_data.get("mobile_no"),otp)
@@ -54,7 +54,7 @@ class OTPVerifySerializer(serializers.Serializer):
         pending=validated_data["pending_user"]
 
         user=User.objects.create(
-            username=validated_data["username"], #validated_data contains clean, validated input from the request
+            username=validated_data["username"], # ✔️validated_data contains clean, validated input from the request
             email=pending.email,
             mobile_no=pending.mobile_no,
         )
@@ -127,7 +127,7 @@ class SubCategorySeializer(serializers.ModelSerializer):
         read_only_fields = ["slug"]
 
 class ProductVariantSerializer(serializers.ModelSerializer):
-    product_name=serializers.ReadOnlyField(source="product.name")
+    product_name=serializers.ReadOnlyField(source="product.name") #via fk only id come so we define variable and got name too
 
     class Meta:
         model=ProductVariant

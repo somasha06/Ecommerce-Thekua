@@ -7,6 +7,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from thekua.views import *
 from thekua.adminviews import *
+from thekua.customerviews import *
+from django.contrib.auth import views as auth_views
+
 
 router = routers.DefaultRouter()
 router.register(r"address", AddressViewSet, basename="address")
@@ -69,6 +72,16 @@ urlpatterns = [
     path("admin/product/<int:id>/edit/", editproduct, name="editproduct"),
     path("admin/productvariant/<int:id>/edit/", editproductvariant, name="editproductvariant"),
 
+    # path("auth/",include("django.contrib.auth.urls")),
+    path("customer/",customerbase,name="customerbase"),
+    # path("customer/wishlist/",customerwishlist,name="customerwishlist"),
+    path("customer/wishlistitem/",customerwishlistitem,name="customerwishlistitem"),
+    path("customer/order/",customerorder,name="customerorder"),
+    path("customer/<int:id>/orderitem/",customerorderitem,name="customerorderitem"),
+    path("customer/cartitem/",customercartitem,name="customercartitem"),
+    # path("auth/login/",login,name="login"),
+    # path("auth/logout/",logout,name="logout"),
+    # path("auth/signup/",signup,name="signup"),
 
 ]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

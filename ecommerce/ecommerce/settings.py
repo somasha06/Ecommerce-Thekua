@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-&mmf=08zzs^%sjg$fub#l_puzp7oqd%ps7j6^x0)=c+g9w7$^%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "72.61.224.176",
+    "www.momscrunch.com"
+]
 
 
 # Application definition
@@ -158,3 +161,7 @@ STATIC_URL = 'static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
+
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/customer/"
+LOGOUT_REDIRECT_URL = "/login/"

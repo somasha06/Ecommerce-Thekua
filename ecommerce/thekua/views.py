@@ -496,7 +496,7 @@ class CreatePaymentView(APIView):
             "payment_capture": 1
         })
 
-        # Save Razorpay details
+        
         order.razorpay_order_id = razorpay_order["id"]
         order.razorpay_payment_id = None
         order.status = "pending"

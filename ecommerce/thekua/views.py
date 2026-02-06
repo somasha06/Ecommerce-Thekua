@@ -1,26 +1,26 @@
 from django.shortcuts import render #**
 from rest_framework.views import APIView #**
 from rest_framework.response import Response #**
-from rest_framework import status #**
+from rest_framework import status,permissions
 from .serializers import * #**
 from django.contrib.auth import login
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from .models import *  #**
 from rest_framework.viewsets import ModelViewSet
-from django.db.models import Exists, OuterRef, BooleanField, Value
+from django.db.models import Exists, OuterRef, BooleanField, Value, Q,Min,F,Avg,Count,Sum
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.decorators import action
 from .permissions import *
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from rest_framework.permissions import AllowAny #**
-from django.db.models import Q,Min
 from decimal import Decimal, InvalidOperation
 from django.db.models.functions import Coalesce
 import razorpay
 from razorpay.errors import SignatureVerificationError
-from django.db.models import F
+from django.utils.timezone import now
+
 
 
 class SignupRequestAPIView(APIView):
@@ -136,7 +136,7 @@ class ProductViewSet(ModelViewSet):
         serializer.save(seller=self.request.user)
 
     def get_queryset(self):
-        queryset = Product.objects.prefetch_related("productvariants") #prefetch helps to get the variant in dict form inside product
+        queryset = Product.objects.prefetch_related("productvariants").annotate(avg_rating=Avg("reviews__rating"),review_count=Count("reviews")) #prefetch helps to get the variant in dict form inside product
         user=self.request.user
 
         if self.action in ["list", "retrieve"]:
@@ -417,7 +417,16 @@ class CheckoutView(APIView):
         if not cart_items.exists():
             return Response({"detail":"Cart is empty"},status=status.HTTP_400_BAD_REQUEST)
 
-
+        # Stock validation
+        for item in cart_items:
+            if item.product_variant.stock < item.quantity:
+                return Response(
+                    {
+                        "error": f"Insufficient stock for {item.product_variant.product.name}"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
         total_price = sum(item.total_price for item in cart_items)
         discount = Decimal(0)
         coupon = cart.coupon
@@ -456,9 +465,9 @@ class CheckoutView(APIView):
         for cart_item in cart.items.select_related("product_variant"):
             order_item=OrderItem.objects.create(order=order,product_variant=cart_item.product_variant,quantity=cart_item.quantity,price=cart_item.product_variant.price)
 
-        if coupon:
-            coupon.used_count = F("used_count") + 1
-            coupon.save(update_fields=["used_count"])
+        # if coupon:
+        #     coupon.used_count = F("used_count") + 1
+        #     coupon.save(update_fields=["used_count"])
 
 
         return Response(
@@ -521,20 +530,11 @@ class VerifyPaymentView(APIView):
         data = request.data
 
         order = get_object_or_404(
-            Order,
-            razorpay_order_id=data.get("razorpay_order_id"),
-            user=request.user,
-            status="pending"
-        )
+            Order,razorpay_order_id=data.get("razorpay_order_id"),user=request.user,status="pending")
 
-        payment = PaymentHistory.objects.filter(
-            razorpay_order_id=order.razorpay_order_id,
-            order=order
-        ).last()
+        payment = PaymentHistory.objects.filter(razorpay_order_id=order.razorpay_order_id,order=order).last()
 
-        client = razorpay.Client(
-            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-        )
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
         
         try:
@@ -571,12 +571,19 @@ class VerifyPaymentView(APIView):
         payment.razorpay_signature = data.get("razorpay_signature")
         payment.save()
 
-        
-        if order.coupon:
-            Coupon.objects.filter(
-                id=order.coupon.id
-            ).update(used_count=F("used_count") + 1)
+        # Reduce stock after successful payment
+        for item in order.items.select_related("product_variant"):
+            variant = item.product_variant
 
+            if variant.stock < item.quantity:
+        # Safety check (should not happen normally)
+                raise ValueError("Insufficient stock during payment")
+
+            variant.stock = F("stock") - item.quantity
+            variant.save(update_fields=["stock"])
+
+        if order.coupon:
+            Coupon.objects.filter(id=order.coupon.i).update(used_count=F("used_count") + 1)
         
         cart = Cart.objects.filter(user=request.user).first()
         if cart:
@@ -584,10 +591,7 @@ class VerifyPaymentView(APIView):
             cart.coupon = None
             cart.save(update_fields=["coupon"])
 
-        return Response(
-            {"message": "Payment successful"},
-            status=status.HTTP_200_OK
-        )
+        return Response({"message": "Payment successful"},status=status.HTTP_200_O)
 
 
 
@@ -685,10 +689,232 @@ class RemoveCouponView(APIView):
                 status=400
             )
 
-        cart.coupon = None
+        cart.coupon = None #here via None coupons get deleted ....looking after cart there is coupon where written on_delete=models.set_null means if coupon will get deleted whole cart will not get deleted on;y coupon will  
         cart.save(update_fields=["coupon"])
 
         return Response({
             "message": "Coupon removed successfully",
             "coupon": None
         })
+    
+class AddReviewsView(APIView):
+    permission_classes=[permissions.IsAuthenticated]
+    def post(self,request,order_id,product_id):
+        user=request.user
+        if user.roles.filter(role__in=["admin","seller"]).exists():
+            return Response({"error": "Admin or Seller cannot add reviews"},status=status.HTTP_403_FORBIDDEN)
+        
+        order=get_object_or_404(Order,id=order_id,user=user,status__in=["paid", "shipped", "delivered"])
+        product=get_object_or_404(Product,id=product_id)
+
+        if not OrderItem.objects.filter(order=order,product_variant__product=product).exists():
+            return Response({"error": "This product is not part of this order"},status=status.HTTP_400_BAD_REQUEST)
+        
+        if Reviews.objects.filter(user=user,order=order,product=product).exists():
+            return Response({"error": "You have already reviewed this product"},status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer=ReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=user,product=product,order=order)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+class ProductReviewListView(APIView):
+    def get(self,request,id):
+        product=get_object_or_404(Product,id=id)
+        reviews=product.reviews.select_related("user").order_by("-created_at")
+        serializer=ReviewSerializer(reviews,many=True)
+        return Response(serializer.data)
+
+class TotalOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsAdminOrSeller]
+
+    def get(self,request):
+        total_orders=Order.objects.count()
+        return Response({"total_orders":total_orders})
+
+class TotalRevenueView(APIView):
+    permission_classes=[IsAuthenticated,IsAdminOrSeller]
+
+    def get(self,request):
+        total_revenue=(Order.objects.filter(status="paid").aggregate(total=Sum("final_price"))["total"]) or 0
+
+        return Response({"total_revenue":round(total_revenue,2)})
+    
+class TodayOrdersView(APIView):
+    permission_classes=[IsAdminOrSeller]
+    
+    def get(self,request):
+        today=now().date()
+
+        todays_orders=Order.objects.filter(created_at__date=today).count()
+        return Response({"todays_orders":todays_orders})
+    
+class LowStockAlertView(APIView):
+    permission_classes=[IsAuthenticated,IsAdminOrSeller]
+
+    def get(self,request):
+        threshold=int(request.query_params.get("threshold",5))
+
+        low_stock=(ProductVariant.objects.filter(stock__lte=threshold,is_active=True).select_related("product").values("id","product__name","weight","stock"))
+        return Response(low_stock)
+    
+# class TopSellingProductsView(APIView):
+#     permission_classes = [IsAuthenticated, IsAdmin]
+
+#     def get(self, request):
+#         top_products = (
+#             OrderItem.objects
+#             .filter(order__status__in=["paid", "shipped", "delivered"])
+#             .values(
+#                 "product_variant__product__id",
+#                 "product_variant__product__name"
+#             )
+#             .annotate(total_sold=Sum("quantity"))
+#             .order_by("-total_sold")[:5]
+#         )
+
+#         return Response(top_products)
+
+class OrderListView(APIView):
+    permission_classes=[IsAuthenticated,IsAdminOrSeller]
+
+    def get(self,request):
+        status_filter=request.query_params.get("status")
+        orders=Order.objects.all().order_by("-created_at")
+        if status_filter:
+            orders=orders.filter(status=status_filter)
+        
+        serializer=OrderSerializer(orders,many=True)
+        return Response(serializer.data)
+    
+class ChangeOrderStatusView(APIView):
+    permission_classes=[IsAuthenticated,IsAdminOrSeller]
+
+    def patch(self,request,order_id):
+        order=get_object_or_404(Order,id=order_id)
+        new_status=request.data.get("status")
+
+        allowed_status=["pending", "paid", "shipped","cancelled"]
+        if new_status not in allowed_status:
+            return Response({"error": "Invalid order status"},status=status.HTTP_400_BAD_REQUEST)
+        
+        if order.status=="delivered":
+            return Response({"error": "Delivered order cannot be changed"},status=status.HTTP_400_BAD_REQUEST)
+        
+        order.status=new_status
+        order.save(update_fields=["status"])
+
+        return Response({"message": "Order status updated successfully","order_id": order.id,"new_status": order.status})
+    
+class CancelOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsAdminorCustomer]
+
+    def post(self,request,order_id):
+        order=get_object_or_404(Order,id=order_id,user=request.user)
+        if order.status in ["shipped","delivered"]:
+            return Response({"error": "Order cannot be cancelled after shipping"},status=status.HTTP_400_BAD_REQUEST)
+
+        if order.status=="cancelled":
+            return Response({"error": "Order is already cancelled"},status=status.HTTP_400_BAD_REQUEST)
+        
+        order.status="cancelled"
+        order.save(update_fields=["status"])
+
+        # OPTIONAL: restore stock
+        for item in order.items.select_related("product_variant"):
+            item.product_variant.stock += item.quantity
+            item.product_variant.save(update_fields=["stock"])
+
+        return Response({"message": "Order cancelled successfully","order_id": order.id})
+    
+class ProductListView(APIView):
+    permission_classes=[IsAuthenticated,IsAdminOrSeller]
+    def get(self,request):
+        products=Product.objects.filter(seller=request.user).prefetch_related("productvariants","images").order_by("-created_at")
+        serializer=ProductSerializer(products,many=True)
+        return Response(serializer.data)
+    
+class SellerAllOrdersView(APIView):
+    permission_classes=[IsAuthenticated,IsSeller]
+    def get(self,request):
+        orders=Order.objects.filter(items__product_variant__product__seller=request.user).distinct().order_by("-created_at")
+        serializer=OrderSerializer(orders,many=True)
+        return Response(serializer.data)
+    
+class PendingOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsSeller]
+    def get(self,request):
+        pendingorders=Order.objects.filter(status="pending",items__product_variant__product__seller=request.user).distinct().order_by("-created_at")
+        serializer=OrderSerializer(pendingorders,many=True)
+        return Response(serializer.data)
+    
+class ShippedOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsSeller]
+    def get(self,request):
+        shippedorders=Order.objects.filter(status="shipped",items__product_variant__product__seller=request.user).distinct().order_by("-created_at")
+        serializer=OrderSerializer(shippedorders,many=True)
+        return Response(serializer.data)
+    
+class DeliveredOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsSeller]
+    def get(self,request):
+        deliveredorder=Order.objects.filter(status="delivered",items__product_variant__product__seller=request.user).distinct().order_by("-created_at")
+        serializer=OrderSerializer(deliveredorder,many=True)
+        return Response(serializer.data)
+    
+class SellerProductReviewView(APIView):
+    permission_classes=[IsAuthenticated,IsSeller]
+    def get(self,request):
+        reviews=Reviews.objects.filter(product__seller=request.user).select_related("product","user","order").order_by("-created_at")
+        serializer=ReviewSerializer(reviews,many=True)
+        return Response(serializer.data)
+    
+class CustomerAllOrdersView(APIView):
+    permission_classes=[IsAuthenticated,IsCustomer]
+    def get(self,request):
+        # order=Order.objects.count(user=request.user)
+        orders=Order.objects.filter(user=request.user).order_by("created_at")
+        serializer=OrderSerializer(orders,many=True)
+        return Response(serializer.data)
+    
+class CustomerAllOrdersCountView(APIView):
+    permission_classes=[IsAuthenticated,IsCustomer]
+    def get(self,request):
+        total_order=Order.objects.filter(status="delivered",user=request.user).count()
+    
+        return Response({"total_order":total_order})
+
+class CustomerPendingOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsCustomer]
+    def get(self,request):
+        pendingorder=Order.objects.filter(status="pending",user=request.user)
+        serializer=OrderSerializer(pendingorder,many=True)
+        return Response(serializer.data)
+    
+class CustomerShippedOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsCustomer]
+    def get(self,request):
+        shippedorder=Order.objects.filter(status="shipped",user=request.user)
+        serializer=OrderSerializer(shippedorder,many=True)
+        return Response(serializer.data)
+
+class CustomerDeliveredOrderView(APIView):
+    permission_classes=[IsAuthenticated,IsCustomer]
+    def get(self,request):
+        deliveredorder=Order.objects.filter(status="delivered",user=request.user)
+        serializer=OrderSerializer(deliveredorder,many=True)
+        return Response(serializer.data)
+    
+class CustomerOrderDetailView(APIView):
+    permission_classes=[IsAuthenticated,IsCustomer]
+    def get(self,request,order_id):
+        order=get_object_or_404(Order,id=order_id,user=request.user)
+        serializer=OrderSerializer(order)
+        return Response(serializer.data)
+    
+
+
+
+
+

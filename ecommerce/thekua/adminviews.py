@@ -21,8 +21,6 @@ def viewproduct(request,id):
     default_variant = productvariants.first()
     profile = StoreProfile.objects.first()
     images = product.images.all()   
-
-
     subcategories=SubCategory.objects.all()
     return render(request,"view_product.html",{"product":product,"subcategories":subcategories,"productvariants":productvariants,"default_variant":default_variant,"profile":profile,"images":images})
 
@@ -226,12 +224,13 @@ def about(request):
     profile = StoreProfile.objects.get(id=1)
     return render(request, "about.html", {"profile": profile})
 
-def deleteproductimage(requset,image_id):
-    images=get_object_or_404(Productimage,id=image_id)
-    product_id=images.product.id
-    if requset.method=="POST":
-        images.delete()
-    return redirect("editproduct",id=product_id)
+def delete_product_image(request, id):
+    image = Productimage.objects.get(id=id)
+    product_id = image.product.id
+    image.productimages.delete()  # deletes file
+    image.delete()                # deletes DB row
+    return redirect('editproduct', id=product_id)
+
 
 # def logout(request):
 #     return redirect(request,"admin/adminbase.html")

@@ -142,10 +142,11 @@ class ProductSerializer(serializers.ModelSerializer):
     subcategory_name=serializers.ReadOnlyField(source="subcategory.name")
     is_wishlisted = serializers.BooleanField(read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
-
+    avg_rating=serializers.FloatField(read_only=True)
+    review_count=serializers.IntegerField(read_only=True)
     class Meta:
         model=Product
-        fields=["id","name","subcategory","subcategory_name","starting_from","is_active","images","slug","is_wishlisted"]
+        fields=["id","name","subcategory","subcategory_name","starting_from","is_active","images","slug","is_wishlisted","avg_rating","review_count"]
         read_only_fields = ["slug"]
 
 
@@ -159,11 +160,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model=Product
         fields=["id","subcategory","subcategory_name","seller_username","name","description","created_at","updated_at","is_active","slug","variants"]
 
-class Review(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     review_user=serializers.ReadOnlyField(source="user.username")
     class Meta:
         model=Reviews
-        fields=["id","product","review_user","rating","comments"]
+        fields=["id","product","order","review_user","rating","comments"]
+        read_only_fields = ["order", "product"]
 
     def validate_rating(self, value):
         if value < 1 or value > 5:

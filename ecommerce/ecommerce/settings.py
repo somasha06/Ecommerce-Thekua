@@ -30,7 +30,8 @@ ALLOWED_HOSTS = [
     "momscrunch.com",
     "www.momscrunch.com",
     "www1.momscrunch.com",
-    "72.61.224.176"
+    "72.61.224.176",
+    "127.0.0.1",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -162,7 +163,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 

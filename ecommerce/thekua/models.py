@@ -319,16 +319,53 @@ class Productimage(models.Model):
 class Reviews(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE,related_name="reviews")
     user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="reviews")
+    order=models.ForeignKey(Order,on_delete=models.CASCADE,related_name="reviews",null=True,blank=True)
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])    
     comments=models.TextField(blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together=("product","user")
+        unique_together=("product","user","order")
 
     def __str__(self):
         return f"{self.product.name} - {self.rating}⭐ by {self.user.username}"
 
     
+class SupportTicket(models.Model):
+    STATUS_CHOICES=[
+        ("open","Open"),
+        ("ai_handling","AI Handling"),
+        ("escalated","Escalated"),
+        ("resolved","Resolved"),
+        ("closed","Closed"),
+    ]
+
+    ISSUE_TYPE_CHOICES=[
+        ("order","Order Issue"),
+        ("product","Product Issue"),
+        ("payment","Payment Issue"),
+        ("delivery","Delivery Issue"),
+        ("general","General Query"),
+    ]
+
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="tickets")
+    order=models.ForeignKey(Order,on_delete=models.SET_NULL,null=True,blank=True)
+    issue_type=models.CharField(max_length=20,choices=ISSUE_TYPE_CHOICES)
+    status=models.CharField(max_length=20,choices=STATUS_CHOICES,default="ai_handling")
+    assigned_to=models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name="assigned_tickets")
+    created_at=models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Ticket #{self.id} - {self.issue_type}"
+    
+
+class SupportMessage(models.Model):
+    ticket=models.ForeignKey(SupportTicket,on_delete=models.CASCADE,related_name="message")
+    sender=models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True)
+    is_ai=models.BooleanField(default=False)
+    message=models.TextField()
+    image=models.ImageField(upload_to="ticketimages/")
+    created_at=models.DateTimeField(auto_now_add=True)
+
 
 

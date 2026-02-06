@@ -57,22 +57,23 @@
                 <div
                     class="bg-white rounded-2xl overflow-hidden border border-slate-100 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 relative">
                     <!-- Image -->
-                    <div class="aspect-[4/3] overflow-hidden bg-slate-50 relative">
-                        {% if product.image %}
-                        <img src="{{product.image.url}}"
-                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            alt="{{product.name}}">
-                        {% else %}
-                        <div class="w-full h-full flex items-center justify-center text-slate-300"><i
-                                class="fa-regular fa-image text-3xl"></i></div>
-                        {% endif %}
+                    
+<div class="aspect-[4/3] overflow-hidden bg-slate-50 relative">
 
-                        <!-- Floating Action -->
-                        <button
-                            class="absolute bottom-3 right-3 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white transition-colors translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 duration-300 z-10">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-                    </div>
+    {% with product.images.first as img %}
+        {% if img %}
+            <img src="{{ img.productimages.url }}"
+                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                 alt="{{ product.name }}">
+        {% else %}
+            <div class="w-full h-full flex items-center justify-center text-slate-300">
+                <i class="fa-regular fa-image text-3xl"></i>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+</div>
+
 
                     <!-- Content -->
                     <div class="p-5">

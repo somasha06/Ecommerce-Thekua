@@ -17,7 +17,6 @@ router.register(r"category",CategoryViewSet,basename="category")
 router.register(r"subcategory",SubcategoryViewSet,basename="subcategory")
 router.register(r"product",ProductViewSet,basename="product")
 router.register(r"productsvariant",ProductVariantViewSet,basename="productvariant")
-# router.register(r"wishlist",WishlistViewSet,basename="wishlist")
 router.register(r"wishlist", WishlistViewSet, basename="wishlist")
 router.register(r"wishlistitem", WishlistItemViewSet, basename="wishlist-items")
 router.register(r"cart", CartViewSet, basename="cart")
@@ -40,11 +39,36 @@ urlpatterns = [
     path("customer/profile/", CustomerProfileUpdateView.as_view()),
     path("cart/applycoupon/", ApplyCouponView.as_view(), name="apply-coupon"),
     path("cart/removecoupon/", RemoveCouponView.as_view()),
-
+    path("orders/<int:order_id>/products/<int:product_id>/review/", AddReviewsView.as_view(), name="addreview"),
+    path("order/<int:order_id>/products/<int:product_id>/reviews/", ProductReviewListView.as_view(), name="productreviews"),
+    path("admin/orders/<int:order_id>/status/",ChangeOrderStatusView.as_view()),
+    path("customer/orders/<int:order_id>/cancel",CancelOrderView.as_view()),
     path("getcoupon/",GetCouponView.as_view()),
 
+    path("totalorders/",TotalOrderView.as_view(),name="TotalOrder"),
+    path("orderslist/",OrderListView.as_view(),name="OrderListView"),
+    path("totalrevenue/",TotalRevenueView.as_view(),name="TotalRevenue"),
+    path("todayorders/",TodayOrdersView.as_view(),name="TodayOrders"),
+    path("lowstock/",LowStockAlertView.as_view(),name="LowStock"),
+
+    #Seller
+    path("products/", ProductListView.as_view()),
+    path("seller/orders/",SellerAllOrdersView.as_view()),
+    path("seller/pendingorders/",PendingOrderView.as_view()),
+    path("seller/shippedorders/",ShippedOrderView.as_view()),
+    path("seller/deliveredorders/",DeliveredOrderView.as_view()),
+    path("seller/reviews/",SellerProductReviewView.as_view()),
+
+    #Customer
+    path("customerer/orders/",CustomerAllOrdersView.as_view()),
+    path("customerer/orderscount/",CustomerAllOrdersCountView.as_view()),
+    path("customerer/orderdetail/",CustomerOrderDetailView.as_view()),
+    path("customerer/pendingorders/",CustomerPendingOrderView.as_view()),
+    path("customerer/deliveredorders/",CustomerDeliveredOrderView.as_view()),
+    path("customerer/shippedorders/",CustomerShippedOrderView.as_view()),
+
+    # ADMIN
     path("",home,name="homepage"),
-    path("p/<int:id>",viewproduct,name="viewproduct"),
     path("admin/",dashboard,name="dashboardpage"),
     path("admin/category",managecategory,name="managecategory"),
     path("admin/category/<int:id>/",deletecategory,name="deletecategory"),
@@ -55,6 +79,7 @@ urlpatterns = [
     path("admin/product/<int:id>/",deleteproduct,name="deleteproduct"),
     path("admin/productvariant/<int:id>/",deleteproductvariant,name="deleteproductvariant"),
     path("admin/manageproduct",manageproduct,name="manageproduct"),
+    path("p/<int:id>",viewproduct,name="viewproduct"),
     path("admin/manageproductvariant",manageproductvariant,name="manageproductvariant"),
 
     path("admin/customer", allcustomer, name="allcustomer"),
@@ -71,6 +96,7 @@ urlpatterns = [
     path("admin/subcategory/<int:id>/edit/", editsubcategory, name="editsubcategory"),
     path("admin/product/<int:id>/edit/", editproduct, name="editproduct"),
     path("admin/productvariant/<int:id>/edit/", editproductvariant, name="editproductvariant"),
+    path('admin/product/image/delete/<int:id>/',delete_product_image,name='delete_product_image'),
 
     # path("auth/",include("django.contrib.auth.urls")),
     path("customer/",customerbase,name="customerbase"),
@@ -83,7 +109,6 @@ urlpatterns = [
     # path("auth/logout/",logout,name="logout"),
     # path("auth/signup/",signup,name="signup"),
 
-]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
-
+]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) 
 #hello testing
 

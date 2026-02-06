@@ -2,19 +2,46 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<h2 class="text-2xl font-bold mb-6 ">
+<h2 class="text-2xl font-bold mb-6">
     Edit Product – {{ product.name }}
 </h2>
 
 <form method="POST" enctype="multipart/form-data" class="space-y-6">
     {% csrf_token %}
-    {{ form|crispy}}
-    
-    <div class="flex gap-4">
+    {{ form|crispy }}
+
+    <!-- Existing Images -->
+    {% if product.images.all %}
+    <div>
+        <h3 class="font-semibold mb-2">Existing Images</h3>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for img in product.images.all %}
+            <div class="relative border rounded-lg overflow-hidden">
+                <img src="{{ img.productimages.url }}"
+                     class="w-full h-32 object-cover">
+
+                <!-- delete image -->
+                <a href="{% url 'delete_product_image' img.id %}"
+                   class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    ✕
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+        <p class="text-sm text-slate-400">No images uploaded yet.</p>
+    {% endif %}
+
+    <!-- Add New Images -->
+    <div>
+        <label class="block font-semibold mb-2">Add More Images</label>
         <input type="file" name="productimages" multiple>
-        <button class="bg-red-500 text-white text-xs px-2 py-1 rounded">
-            Delete
-        </button>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-4">
         <button
             type="submit"
             class="bg-slate-900 text-white px-6 py-2 rounded-xl">

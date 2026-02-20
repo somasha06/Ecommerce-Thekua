@@ -7,7 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from thekua.views import *
 from thekua.adminviews import *
-from thekua.customerviews import *
+# from thekua.customerviews import *
 from django.contrib.auth import views as auth_views
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -128,15 +128,15 @@ urlpatterns = [
     path('admin/product/image/delete/<int:id>/',delete_product_image,name='delete_product_image'),
 
     # path("auth/",include("django.contrib.auth.urls")),
-    path("customer/",customerbase,name="customerbase"),
-    # path("customer/wishlist/",customerwishlist,name="customerwishlist"),
-    path("customer/wishlistitem/",customerwishlistitem,name="customerwishlistitem"),
-    path("customer/order/",customerorder,name="customerorder"),
-    path("customer/<int:id>/orderitem/",customerorderitem,name="customerorderitem"),
-    path("customer/cartitem/",customercartitem,name="customercartitem"),
-    # path("auth/login/",login,name="login"),
-    # path("auth/logout/",logout,name="logout"),
-    # path("auth/signup/",signup,name="signup"),
+    # path("customer/",customerbase,name="customerbase"),
+    # # path("customer/wishlist/",customerwishlist,name="customerwishlist"),
+    # path("customer/wishlistitem/",customerwishlistitem,name="customerwishlistitem"),
+    # path("customer/order/",customerorder,name="customerorder"),
+    # path("customer/<int:id>/orderitem/",customerorderitem,name="customerorderitem"),
+    # path("customer/cartitem/",customercartitem,name="customercartitem"),
+    # # path("auth/login/",login,name="login"),
+    # # path("auth/logout/",logout,name="logout"),
+    # # path("auth/signup/",signup,name="signup"),
 
 ]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) 
 #hello testing

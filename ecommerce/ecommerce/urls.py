@@ -9,6 +9,10 @@ from thekua.views import *
 from thekua.adminviews import *
 from thekua.customerviews import *
 from django.contrib.auth import views as auth_views
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from django.urls import re_path
 
 
 router = routers.DefaultRouter()
@@ -23,6 +27,18 @@ router.register(r"cart", CartViewSet, basename="cart")
 router.register(r"cartitem", CartItemViewSet, basename="cartitem")
 router.register(r"orderitem", OrderItemViewSet, basename="orderitem")
 router.register(r"order", OrderViewSet, basename="order")
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Thekua Ecommerce API",
+        default_version='v1',
+        description="API documentation for Thekua Ecommerce",
+        contact=openapi.Contact(email="admin@momscrunch.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
 
 
 urlpatterns = [
@@ -44,6 +60,19 @@ urlpatterns = [
     path("admin/orders/<int:order_id>/status/",ChangeOrderStatusView.as_view()),
     path("customer/orders/<int:order_id>/cancel",CancelOrderView.as_view()),
     path("getcoupon/",GetCouponView.as_view()),
+
+
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$',
+            schema_view.without_ui(cache_timeout=0),
+            name='schema-json'),
+
+    re_path(r'^swagger/$',
+            schema_view.with_ui('swagger', cache_timeout=0),
+            name='schema-swagger-ui'),
+
+    re_path(r'^redoc/$',
+            schema_view.with_ui('redoc', cache_timeout=0),
+            name='schema-redoc'),
 
     path("totalorders/",TotalOrderView.as_view(),name="TotalOrder"),
     path("orderslist/",OrderListView.as_view(),name="OrderListView"),

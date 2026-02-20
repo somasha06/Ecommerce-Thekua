@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'thekua.apps.ThekuaConfig',
     'rest_framework',
+    'drf_yasg',
     "crispy_forms",
     "crispy_tailwind",
 ]

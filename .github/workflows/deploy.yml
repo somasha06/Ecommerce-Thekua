@@ -1,4 +1,4 @@
-name: Django CI/CD Deploy
+name: Ecommerce Django CI/CD Deploy
 
 on:
   push:

@@ -27,9 +27,10 @@ SECRET_KEY = 'django-insecure-&mmf=08zzs^%sjg$fub#l_puzp7oqd%ps7j6^x0)=c+g9w7$^%
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "momscrunch.com",
     "www.momscrunch.com",
-    "www1.momscrunch.com",
+    "momscrunch.com",
+    "api.momscrunch.com",
+    "api1.momscrunch.com",
     "72.61.224.176",
     "127.0.0.1",
 ]

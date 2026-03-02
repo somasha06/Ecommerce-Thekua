@@ -46,9 +46,12 @@ urlpatterns = [
     # path("", include("thekua.urls")),
     path('api-auth/', include('rest_framework.urls')),
     path("api/", include(router.urls)),
-    path("signup/", SignupRequestAPIView.as_view()),
-    path("verify-otp/", OTPVerifyAPIView.as_view()),
-    path("login/", LoginAPIView.as_view(), name="login"),
+    
+    #Auth
+    path("api/auth/signup/", SignupRequestAPIView.as_view()),
+    path("api/auth/verify-otp/", OTPVerifyAPIView.as_view()),
+    path("api/auth/login/", LoginAPIView.as_view(), name="login"),
+
     path("checkout/", CheckoutView.as_view(), name="checkout"),
     path("createpayment/", CreatePaymentView.as_view()),
     path("verifypayment/", VerifyPaymentView.as_view()),

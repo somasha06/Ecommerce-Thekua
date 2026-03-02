@@ -23,7 +23,7 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+          ssh -o StrictHostKeyChecking=no root@72.61.224.176 echo "connected" << EOF
 
           cd ${{ secrets.PROJECT_PATH }}
 

@@ -20,11 +20,11 @@ jobs:
 
       - name: Debug host
         run: echo "Host is ${{ secrets.SERVER_HOST }}"
-        
+
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          ssh root@72.61.224.176 << 'EOF'
 
           cd ${{ secrets.PROJECT_PATH }}
 
